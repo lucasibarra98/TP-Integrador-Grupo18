@@ -22,29 +22,29 @@
     </LogicalFolder>
     <LogicalFolder Name="Queries" Type="0" Sorted="true">
       <Items>
-        <FileNode Name="Script_Entrega3_Grupo18_CreacionDBCom2900G18.sql">
+        <FileNode Name="00_CreacionDB.sql">
           <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:DESKTOP-H972CGI\SQLEXPRESS:True</AssociatedConnectionMoniker>
           <AssociatedConnSrvName>DESKTOP-H972CGI\SQLEXPRESS</AssociatedConnSrvName>
           <AssociatedConnUserName />
-          <FullPath>Script_Entrega3_Grupo18_CreacionDBCom2900G18.sql</FullPath>
+          <FullPath>00_CreacionDB.sql</FullPath>
         </FileNode>
-        <FileNode Name="Script_Entrega3_Grupo18_CreacionSPCom2900G18.sql">
+        <FileNode Name="01_CreacionSP.sql">
           <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:DESKTOP-H972CGI\SQLEXPRESS:True</AssociatedConnectionMoniker>
           <AssociatedConnSrvName>DESKTOP-H972CGI\SQLEXPRESS</AssociatedConnSrvName>
           <AssociatedConnUserName />
-          <FullPath>Script_Entrega3_Grupo18_CreacionSPCom2900G18.sql</FullPath>
+          <FullPath>01_CreacionSP.sql</FullPath>
         </FileNode>
-        <FileNode Name="Script_Entrega3_Grupo18_PruebasInsercionCom2900G18.sql">
+        <FileNode Name="02_PruebasInsercion.sql">
           <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:DESKTOP-H972CGI\SQLEXPRESS:True</AssociatedConnectionMoniker>
           <AssociatedConnSrvName>DESKTOP-H972CGI\SQLEXPRESS</AssociatedConnSrvName>
           <AssociatedConnUserName />
-          <FullPath>Script_Entrega3_Grupo18_PruebasInsercionCom2900G18.sql</FullPath>
+          <FullPath>02_PruebasInsercion.sql</FullPath>
         </FileNode>
-        <FileNode Name="Script_Entrega3_Grupo18_PruebasModificacionCom2900G18.sql">
+        <FileNode Name="03_PruebasModificacion.sql">
           <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:DESKTOP-H972CGI\SQLEXPRESS:True</AssociatedConnectionMoniker>
           <AssociatedConnSrvName>DESKTOP-H972CGI\SQLEXPRESS</AssociatedConnSrvName>
           <AssociatedConnUserName />
-          <FullPath>Script_Entrega3_Grupo18_PruebasModificacionCom2900G18.sql</FullPath>
+          <FullPath>03_PruebasModificacion.sql</FullPath>
         </FileNode>
       </Items>
     </LogicalFolder>
