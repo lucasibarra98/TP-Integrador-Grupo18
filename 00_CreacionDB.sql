@@ -1,18 +1,32 @@
 /*
-Entrega 3
-Luego de decidirse por un motor de base de datos relacional, llegó el momento de generar la
-base de datos.
-Deberá instalar el DMBS y documentar el proceso. No incluya capturas de pantalla. Detalle
-las configuraciones aplicadas (ubicación de archivos, memoria asignada, seguridad, puertos,
-etc.) en un documento como el que le entregaría al DBA.
-Cree la base de datos, entidades y relaciones. Incluya restricciones y claves. Deberá entregar
-un archivo .sql con el script completo de creación (debe funcionar si se lo ejecuta “tal cual” es
-entregado). Incluya comentarios para indicar qué hace cada módulo de código.
-Genere store procedures para manejar la inserción, modificado, borrado (si corresponde,
-también debe decidir si determinadas entidades solo admitirán borrado lógico) de cada tabla.
-Los nombres de los store procedures NO deben comenzar con “SP”.
-Genere esquemas para organizar de forma lógica los componentes del sistema y aplique esto
-en la creación de objetos. NO use el esquema “dbo”.
+	Pautas generales para el desarrollo del TP
+
+	• Documente las correcciones que haga indicando número de línea, contenido previo y
+	contenido nuevo. Esto se cotejará para constatar que cumpla correctamente la
+	consigna.
+	• El código fuente no debe incluir referencias hardcodeadas a nombres o ubicaciones
+	de archivo. Esto debe permitirse ser provisto por parámetro en la invocación. En el
+	código de ejemplo el grupo decidirá dónde se ubicarían los archivos. Esto debe
+	aparecer en comentarios del módulo.
+	• Adicionalmente se requiere que el sistema sea capaz de generar un archivo XML
+	detallando XXXXX. El mismo debe constar de los datos del XXXX.
+	• Deberá presentar un archivo .sql con el script de creación de los objetos
+	correspondientes. En el mismo incluya un comentario donde conste este enunciado,
+	la fecha de entrega, número de grupo, nombre de la materia, nombres y DNI de los
+	alumnos. El mismo archivo SQL debe permitir la generación de los objetos
+	consignados en esta entrega (debe admitir una ejecución completa sin fallos).
+	• Cada archivo SQL que contiene el código de creación de objetos debe comenzar su
+	nombre con dos dígitos indicando el orden en que deben ejecutarse. Por ejemplo
+	“00_CreacionSPImportacionCatalogo”. Estos archivos deben entregarse (como todos
+	los scripts) dentro de un proyecto/solución. Todos deben estar en el repositorio git del
+	grupo
+	• También debe presentar un archivo .sql que consista en las invocaciones a los SP
+	creados para generar la importación. Este archivo (que puede considerarse de testing)
+	debe contener comentarios para indicar el orden de ejecución.
+	• Entregar todo en un zip cuyo nombre sea Grupo_XX.zip mediante la sección de
+	prácticas de MIEL. Solo uno de los miembros del grupo debe hacer la entrega.
+	• Se recomienda revisar periódicamente el foro en Miel de la materia. En el mismo se
+	informará el agregado de información, pautas o dudas respecto al TP
 */
 
 /*
@@ -23,6 +37,16 @@ Integrantes:
 	Hossein, Santiago - 43.872.682
 	Mallet, Fernando - 39.770.041
 	Ibarra, Lucas - 41.332.340
+*/
+
+/*
+	Entrega 3
+
+	Cree la base de datos, entidades y relaciones. Incluya restricciones y claves. Deberá entregar
+	un archivo .sql con el script completo de creación (debe funcionar si se lo ejecuta “tal cual” es
+	entregado). Incluya comentarios para indicar qué hace cada módulo de código.
+	Genere esquemas para organizar de forma lógica los componentes del sistema y aplique esto
+	en la creación de objetos. NO use el esquema “dbo”.
 */
 
 
