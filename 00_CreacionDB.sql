@@ -175,15 +175,6 @@ CREATE TABLE ventas.TipoFactura (
 );
 GO
 
-CREATE TABLE ventas.Factura (
-    id INT IDENTITY(1,1),
-    cod VARCHAR(50) UNIQUE NOT NULL,
-    idTipoFactura INT NOT NULL,
-    CONSTRAINT PK_Factura PRIMARY KEY (id),
-    CONSTRAINT FK_Factura_TipoFactura FOREIGN KEY (idTipoFactura) REFERENCES ventas.TipoFactura (id)
-);
-GO
-
 CREATE TABLE ventas.TipoCliente (
     id INT IDENTITY(1,1),
     nombre VARCHAR(50) UNIQUE NOT NULL,
@@ -191,22 +182,57 @@ CREATE TABLE ventas.TipoCliente (
 );
 GO
 
-CREATE TABLE ventas.Venta (
+CREATE TABLE ventas.Factura (
     id INT IDENTITY(1,1),
-    fecha DATE NOT NULL,
+	idTipoFactura INT NOT NULL,
+	idTipoCliente INT NOT NULL,
+	genero VARCHAR(10) NOT NULL CHECK genero = 'Male' OR genero = 'Female',
+	fecha DATE NOT NULL,
     hora TIME NOT NULL,
-    idFactura INT UNIQUE NOT NULL,
+	total DECIMAL(10,2) NOT NULL,
     idPago INT UNIQUE NOT NULL,
-    idTipoCliente INT NOT NULL,
-    genero VARCHAR(10) NOT NULL,
-    idEmpleado INT NOT NULL,
-    cantidad INT NOT NULL,
-    idProducto INT NOT NULL,
-    CONSTRAINT PK_Ventas PRIMARY KEY (id),
-    CONSTRAINT FK_Ventas_Factura FOREIGN KEY (idFactura) REFERENCES ventas.Factura (id),
-    CONSTRAINT FK_Ventas_Pago FOREIGN KEY (idPago) REFERENCES ventas.Pago (id),
-	CONSTRAINT FK_Ventas_Prod FOREIGN KEY (idProducto) REFERENCES productos.Producto(id),
-	CONSTRAINT FK_Ventas_Empl FOREIGN KEY (idEmpleado) REFERENCES negocio.Empleado(id),
-    CONSTRAINT FK_Ventas_TipoCliente FOREIGN KEY (idTipoCliente) REFERENCES ventas.TipoCliente (id),
+	idEmpleado INT NOT NULL,
+    idSucursal INT NOT NULL,
+    CONSTRAINT PK_Factura PRIMARY KEY (id),
+	CONSTRAINT FK_Factura_TipoFactura FOREIGN KEY (idTipoFactura) REFERENCES ventas.TipoFactura (id).
+    CONSTRAINT FK_Factura_TipoCliente FOREIGN KEY (idTipoCliente) REFERENCES ventas.TipoCliente (id),
+    CONSTRAINT FK_Factura_Pago FOREIGN KEY (idPago) REFERENCES ventas.Pago (id),
+	CONSTRAINT FK_Factura_Empleado FOREIGN KEY (idEmpleado) REFERENCES negocio.Empleado(id),
+	CONSTRAINT FK_Factura_idSucursal FOREIGN KEY (idSucursal) REFERENCES ventas.Sucursal (id)
 );
+GO
+
+CREATE TABLE ventas.DetalleFactura(
+	id INT IDENTITY(1,1),
+	idFactura INT NOT NULL,
+	idProducto INT NOT NULL,
+	cantidad INT NOT NULL,
+	precioUnitario INT NOT NULL,
+	subtotal DECIMAL(10,2),
+	CONSTRAINT PK_DetallFactura PRIMARY KEY (id),
+	CONSTRAINT FK_DetalleFactura_Factura FOREIGN KEY (idFactura) REFERENCES ventas.Factura (id),
+	CONSTRAINT FK_Factura_Producto FOREIGN KEY (idProducto) REFERENCES productos.Producto(id)
+)
+GO
+
+CREATE TABLE ventas.NotaCredito (
+	id INT IDENTITY(1,1),
+	idFactura INT UNIQUE NOT NULL,
+	fecha DATE NOT NULL,
+	total DECIMAL(10,2),
+	motivo VARCHAR(100),
+	CONSTRAINT PK_NotaCredito PRIMARY KEY (id)
+)
+GO
+
+CREATE TABLE ventas.DetalleNotaCredito (
+	id INT IDENTITY(1,1),
+	idNotaCredito INT UNIQUE NOT NULL,
+	idDetalleFactura INT NOT NULL,
+	cantidad INT NOT NULL,
+	precioUnitario DECIMAL(10,2) NOT NULL,
+	subtotal DECIMAL(10,2) NOT NULL,
+	CONSTRAINT PK_DetalleNotaCredito PRIMARY KEY (id),
+	CONSTRAINT FK_DetalleNotaCredito_idNotaCredito FOREIGN KEY (idNotaCredito) REFERENCES ventas.NotaCredito(id)
+)
 GO
