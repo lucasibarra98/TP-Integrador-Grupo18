@@ -98,11 +98,11 @@ GO
 CREATE TABLE productos.Producto
 (
     id INT IDENTITY(1,1),
-    nombre VARCHAR(50) NOT NULL UNIQUE,
+    nombre VARCHAR(100) NOT NULL UNIQUE,
     precioUnitario DECIMAL(10,2) NOT NULL,
     cantidadPorUnidad VARCHAR(30),
 	idLineaProd INT NOT NULL,
-    idProveedor INT NOT NULL,
+    idProveedor INT,
 	estado CHAR(1) DEFAULT 'A' CHECK(estado IN ('A','I')), -- La columna estado se coloca para un borrado lógico, donde A es Activo e I es Inactivo.
 	catalogo CHAR(3) NOT NULL, CHECK(catalogo IN('IMP','ELE','CSV')),
     CONSTRAINT PK_Productos PRIMARY KEY (id),

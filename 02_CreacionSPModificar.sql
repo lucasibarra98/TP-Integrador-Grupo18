@@ -65,7 +65,7 @@ GO
 --Modifico Producto
 CREATE OR ALTER PROCEDURE productos.ModificarProducto
     @id INT,
-    @nombre VARCHAR(50),
+    @nombre VARCHAR(100),
     @precioUnitario DECIMAL(10,2),
     @cantidadPorUnidad VARCHAR(30),
     @idLineaProd INT,

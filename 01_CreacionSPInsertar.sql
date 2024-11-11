@@ -58,7 +58,7 @@ GO
 -- Inserta producto
 -- Inserta un nuevo producto
 CREATE OR ALTER PROCEDURE productos.InsertarProducto
-    @nombre VARCHAR(50),
+    @nombre VARCHAR(100),
     @precioUnitario DECIMAL(10,2),
     @cantidadPorUnidad VARCHAR(30),
     @idLineaProd INT,

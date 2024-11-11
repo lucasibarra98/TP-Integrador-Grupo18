@@ -43,23 +43,23 @@
           <AssociatedConnUserName />
           <FullPath>00_CreacionDB.sql</FullPath>
         </FileNode>
-        <FileNode Name="01_CreacionSP.sql">
-          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:DESKTOP-H972CGI\SQLEXPRESS:True</AssociatedConnectionMoniker>
-          <AssociatedConnSrvName>DESKTOP-H972CGI\SQLEXPRESS</AssociatedConnSrvName>
+        <FileNode Name="01_CreacionSPInsertar.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:DESKTOP-RMUFN3C\AURORASA:True</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>DESKTOP-RMUFN3C\AURORASA</AssociatedConnSrvName>
           <AssociatedConnUserName />
-          <FullPath>01_CreacionSP.sql</FullPath>
+          <FullPath>01_CreacionSPInsertar.sql</FullPath>
         </FileNode>
-        <FileNode Name="02_PruebasInsercion.sql">
-          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:DESKTOP-H972CGI\SQLEXPRESS:True</AssociatedConnectionMoniker>
-          <AssociatedConnSrvName>DESKTOP-H972CGI\SQLEXPRESS</AssociatedConnSrvName>
+        <FileNode Name="02_CreacionSPModificar.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:DESKTOP-RMUFN3C\AURORASA:True</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>DESKTOP-RMUFN3C\AURORASA</AssociatedConnSrvName>
           <AssociatedConnUserName />
-          <FullPath>02_PruebasInsercion.sql</FullPath>
+          <FullPath>02_CreacionSPModificar.sql</FullPath>
         </FileNode>
-        <FileNode Name="03_PruebasModificacion.sql">
-          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:DESKTOP-H972CGI\SQLEXPRESS:True</AssociatedConnectionMoniker>
-          <AssociatedConnSrvName>DESKTOP-H972CGI\SQLEXPRESS</AssociatedConnSrvName>
+        <FileNode Name="03_CreacionSPEliminar.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:DESKTOP-RMUFN3C\AURORASA:True</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>DESKTOP-RMUFN3C\AURORASA</AssociatedConnSrvName>
           <AssociatedConnUserName />
-          <FullPath>03_PruebasModificacion.sql</FullPath>
+          <FullPath>03_CreacionSPEliminar.sql</FullPath>
         </FileNode>
         <FileNode Name="CreacionSPImportacion.sql">
           <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:DESKTOP-RMUFN3C\AURORASA:True</AssociatedConnectionMoniker>
