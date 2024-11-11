@@ -112,11 +112,23 @@ CREATE TABLE productos.Producto
 GO
 
 -- SCHEMA negocio
+
+CREATE TABLE negocio.Provincia
+(
+    id INT IDENTITY(1,1),
+    nombre VARCHAR(50) UNIQUE NOT NULL,
+    CONSTRAINT PK_Provincia PRIMARY KEY (id)
+);
+GO
+
 CREATE TABLE negocio.Ciudad
 (
     id INT IDENTITY(1,1),
     nombre VARCHAR(50) UNIQUE NOT NULL,
-    CONSTRAINT PK_Ciudad PRIMARY KEY (id)
+	reemplazaPor VARCHAR (50) NULL,
+    idProvincia INT NOT NULL,
+    CONSTRAINT PK_Ciudad PRIMARY KEY (id),
+    CONSTRAINT FK_Ciudad_Provincia FOREIGN KEY (idProvincia) REFERENCES negocio.Provincia(id)
 );
 GO
 
