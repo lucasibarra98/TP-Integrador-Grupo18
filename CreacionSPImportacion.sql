@@ -81,6 +81,51 @@ BEGIN
 END
 GO
 
+CREATE OR ALTER PROCEDURE importacion.ImportarSucursalesYDomicilios @ruta VARCHAR(256) AS
+BEGIN
+	DROP TABLE IF EXISTS #Sucursal
+	CREATE TABLE #Sucursal(ciudad VARCHAR(50), reemplazarPor VARCHAR(50), direccion VARCHAR(100), horario VARCHAR(100), telefono CHAR(9))
+
+	EXEC importacion.ImportarXlsx @ruta=@ruta, @hoja='sucursal', @tabla='#Sucursal'
+
+	;WITH CTE AS(
+		SELECT *, ROW_NUMBER() OVER (ORDER BY ciudad) AS fila
+		FROM #Sucursal CROSS APPLY string_split(direccion, ',')
+	)
+	SELECT *
+	FROM CTE
+	WHERE fila % 2 = 0
+	--WHERE (3 * fila + 1) % fila = 0
+	/*
+	INSERT INTO negocio.Ciudad
+	SELECT *, ROW_NUMBER()
+	FROM STRING_SPLIT(*/
+END
+GO
+
+DECLARE @asd VARCHAR(100)
+SET @asd = 'C:\TP\TP_integrador_Archivos\Informacion_complementaria.xlsx'
+EXEC importacion.ImportarSucursalesYDomicilios @ruta=@asd
+GO
+
+CREATE OR ALTER PROCEDURE importacion.ImportarEmpleados @ruta VARCHAR(256) AS
+BEGIN
+	DROP TABLE IF EXISTS #Empleado
+	CREATE TABLE #Empleado(id CHAR(6), nombre VARCHAR(20), apellido VARCHAR(20), dni CHAR(8), emailPersonal VARCHAR(50), emailEmpresa VARCHAR(50), cuil CHAR(11), cargo VARCHAR(30), ciudad VARCHAR(50), turno CHAR(2))
+
+	EXEC importacion.ImportarXlsx @ruta=@ruta, @hoja='Empleados', @tabla='#Emplado'
+
+	-- Creación de cargos
+	INSERT INTO negocio.Cargo
+	SELECT DISTINCT cargo
+	FROM #Empleado
+
+	INSERT INTO negocio.Empleado
+	SELECT CAST(id AS INT), nombre, apellido, CAST(dni AS INT), emailPersonal, emailEmpresa, CAST(cuil AS BIGINT), (SELECT id FROM negocio.Cargo WHERE nombre=cargo)
+	FROM #Empleado
+END
+GO
+
 -- Creación de Store Procedures para importar catálogos
 
 CREATE OR ALTER PROCEDURE importacion.ImportarCatalogoCsv @ruta VARCHAR(256) AS
@@ -128,9 +173,9 @@ BEGIN
 	SET nombre = c.name, precioUnitario = c.price, idLineaProd = (SELECT lp.id FROM productos.LineaProducto AS lp INNER JOIN productos.Categoria AS cat ON cat.idLineaProd = lp.id WHERE cat.nombre = c.category), estado='A'
 	FROM productos.Producto AS p, #CatalogoCsv AS c
 	WHERE p.nombre = c.name
-
+use master
 	-- Insertar los que no existen actualmente
-	INSERT INTO productos.Producto (nombre, precioUnitario, idLineaProd)
+	INSERT INTO productos.Producto (nombre, precioUnitario, idLineaProd, catalogo)
 		SELECT cc.name, CAST(cc.price AS DECIMAL(10, 2)) AS precioUnitario, CAST(lp.idLineaProd AS INT) AS idLineaProd 
 		FROM #CatalogoCsv AS cc INNER JOIN productos.Categoria AS lp ON cc.category = lp.nombre
 		WHERE NOT EXISTS (SELECT 1 FROM productos.Producto WHERE nombre = cc.name)

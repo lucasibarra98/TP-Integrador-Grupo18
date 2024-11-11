@@ -62,8 +62,8 @@
           <FullPath>03_PruebasModificacion.sql</FullPath>
         </FileNode>
         <FileNode Name="CreacionSPImportacion.sql">
-          <AssociatedConnectionMoniker />
-          <AssociatedConnSrvName />
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:DESKTOP-RMUFN3C\AURORASA:True</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>DESKTOP-RMUFN3C\AURORASA</AssociatedConnSrvName>
           <AssociatedConnUserName />
           <FullPath>CreacionSPImportacion.sql</FullPath>
         </FileNode>

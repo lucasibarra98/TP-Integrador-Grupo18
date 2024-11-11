@@ -50,7 +50,6 @@ Integrantes:
 */
 
 
-
 ---CREAMOS BASE 
 CREATE DATABASE Com2900G18;
 GO
@@ -210,7 +209,7 @@ CREATE TABLE ventas.Factura (
     id INT IDENTITY(1,1),
 	idTipoFactura INT NOT NULL,
 	idTipoCliente INT NOT NULL,
-	genero VARCHAR(10) NOT NULL CHECK genero = 'Male' OR genero = 'Female',
+	genero VARCHAR(10) NOT NULL CHECK (genero = 'Male' OR genero = 'Female'),
 	fecha DATE NOT NULL,
     hora TIME NOT NULL,
 	total DECIMAL(10,2) NOT NULL,
@@ -218,11 +217,11 @@ CREATE TABLE ventas.Factura (
 	idEmpleado INT NOT NULL,
     idSucursal INT NOT NULL,
     CONSTRAINT PK_Factura PRIMARY KEY (id),
-	CONSTRAINT FK_Factura_TipoFactura FOREIGN KEY (idTipoFactura) REFERENCES ventas.TipoFactura (id).
+	CONSTRAINT FK_Factura_TipoFactura FOREIGN KEY (idTipoFactura) REFERENCES ventas.TipoFactura (id),
     CONSTRAINT FK_Factura_TipoCliente FOREIGN KEY (idTipoCliente) REFERENCES ventas.TipoCliente (id),
     CONSTRAINT FK_Factura_Pago FOREIGN KEY (idPago) REFERENCES ventas.Pago (id),
 	CONSTRAINT FK_Factura_Empleado FOREIGN KEY (idEmpleado) REFERENCES negocio.Empleado(id),
-	CONSTRAINT FK_Factura_idSucursal FOREIGN KEY (idSucursal) REFERENCES ventas.Sucursal (id)
+	CONSTRAINT FK_Factura_idSucursal FOREIGN KEY (idSucursal) REFERENCES negocio.Sucursal (id)
 );
 GO
 
@@ -259,3 +258,7 @@ CREATE TABLE ventas.DetalleNotaCredito (
 	CONSTRAINT FK_DetalleNotaCredito_idNotaCredito FOREIGN KEY (idNotaCredito) REFERENCES ventas.NotaCredito(id)
 )
 GO
+
+use master
+go
+drop database Com2900G18
