@@ -105,6 +105,7 @@ CREATE TABLE productos.Producto
 	idLineaProd INT NOT NULL,
     idProveedor INT NOT NULL,
 	estado CHAR(1) DEFAULT 'A' CHECK(estado IN ('A','I')), -- La columna estado se coloca para un borrado lógico, donde A es Activo e I es Inactivo.
+	catalogo CHAR(3) NOT NULL, CHECK(catalogo IN('IMP','ELE','CSV')),
     CONSTRAINT PK_Productos PRIMARY KEY (id),
     CONSTRAINT FK_LineaProd_Prod FOREIGN KEY (idLineaProd) REFERENCES productos.LineaProducto(id),
     CONSTRAINT FK_Proveedor_Prod FOREIGN KEY (idProveedor) REFERENCES productos.Proveedor(id),
