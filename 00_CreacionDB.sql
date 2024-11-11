@@ -254,7 +254,6 @@ CREATE TABLE ventas.DetalleNotaCredito (
 	idNotaCredito INT UNIQUE NOT NULL,
 	idDetalleFactura INT NOT NULL,
 	cantidad INT NOT NULL,
-	precioUnitario DECIMAL(10,2) NOT NULL,
 	subtotal DECIMAL(10,2) NOT NULL,
 	CONSTRAINT PK_DetalleNotaCredito PRIMARY KEY (id),
 	CONSTRAINT FK_DetalleNotaCredito_idNotaCredito FOREIGN KEY (idNotaCredito) REFERENCES ventas.NotaCredito(id)
