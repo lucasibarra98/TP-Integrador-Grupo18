@@ -1,3 +1,27 @@
+/*
+Entrega 4
+	Se proveen maestros de XXX.
+	Ver archivo “Datasets para importar” en Miel.
+
+	Se requiere que importe toda la información antes mencionada a la base de datos:
+	• Genere los objetos necesarios (store procedures, funciones, etc.) para importar los
+	archivos antes mencionados. Tenga en cuenta que cada mes se recibirán archivos de
+	novedades con la misma estructura, pero datos nuevos para agregar a cada maestro.
+	• Considere este comportamiento al generar el código. Debe admitir la importación de
+	novedades periódicamente.
+	• Cada maestro debe importarse con un SP distinto. No se aceptarán scripts que
+	realicen tareas por fuera de un SP.
+	• La estructura/esquema de las tablas a generar será decisión suya. Puede que deba
+	realizar procesos de transformación sobre los maestros recibidos para adaptarlos a la
+	estructura requerida.
+	Trabajo Práctico Integrador
+	Pág. 9 de 10
+	• Los archivos CSV/JSON no deben modificarse. En caso de que haya datos mal
+	cargados, incompletos, erróneos, etc., deberá contemplarlo y realizar las correcciones
+	en el fuente SQL. (Sería una excepción si el archivo está malformado y no es posible
+	interpretarlo como JSON o CSV). 
+*/
+
 USE Com2900G18;
 GO
 
@@ -310,15 +334,6 @@ BEGIN
 END
 GO
 
-/*
-TRUNCATE TABLE productos.LineaProductos
-SELECT * FROM productos.LineaProductos
-SELECT * FROM productos.Categoria
-DELETE productos.LineaProductos
-SELECT * FROM productos.Productos
-*/
---SELECT * FROM productos.Producto
-
 DECLARE @rutaInfoComplementaria VARCHAR(256)
 DECLARE @rutaCatalogoCsv VARCHAR(256)
 DECLARE @rutaCatalogoElectronica VARCHAR(256)
@@ -329,7 +344,7 @@ SET @rutaCatalogoCsv = 'C:\TP\TP_integrador_Archivos\Productos\catalogo.csv'
 SET @rutaCatalogoElectronica = 'C:\TP\TP_integrador_Archivos\Productos\Electronic accessories.xlsx'
 SET @rutaCatalogoImportados = 'C:\TP\TP_integrador_Archivos\Productos\Productos_importados.xlsx'
 
---EXEC importacion.CargarLineasDeProducto @ruta=@rutaInfoComplementaria
+EXEC importacion.CargarLineasDeProducto @ruta=@rutaInfoComplementaria
 EXEC importacion.ImportarCatalogoCsv @ruta=@rutaCatalogoCsv
 EXEC importacion.ImportarAccesoriosElectronicos @ruta=@rutaCatalogoElectronica
 EXEC importacion.ImportarProductosImportados @ruta=@rutaCatalogoImportados
