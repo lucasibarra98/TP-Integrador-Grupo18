@@ -137,11 +137,11 @@ CREATE TABLE negocio.Domicilio
     id INT IDENTITY(1,1),
     calle VARCHAR(50) NOT NULL,
     numero INT NOT NULL,
-    idCiudad INT NOT NULL,
-    codigoPostal VARCHAR(8) NOT NULL,
+    idCiudad INT,
+    codigoPostal VARCHAR(8),
     CONSTRAINT PK_Domicilio PRIMARY KEY (id),
     CONSTRAINT FK_Ciudad_Dom FOREIGN KEY (idCiudad) REFERENCES negocio.Ciudad(id),
-	CONSTRAINT U_Domicilio UNIQUE (calle, numero, idCiudad) 
+	CONSTRAINT U_Domicilio UNIQUE (calle, numero) 
 );
 GO
 
@@ -176,7 +176,7 @@ CREATE TABLE negocio.Empleado
     cuil BIGINT NOT NULL,
     idCargo INT NOT NULL,
     idSucursal INT NOT NULL,
-    turno VARCHAR(20) NOT NULL,
+    turno VARCHAR(20) NOT NULL CHECK (turno = 'TM' OR turno = 'TT' OR turno = 'Jornada completa'),
     CONSTRAINT PK_Empleado PRIMARY KEY (id),
     CONSTRAINT FK_Domicilio_Empl FOREIGN KEY (idDomicilio) REFERENCES negocio.Domicilio(id),
     CONSTRAINT FK_Cargo_Empl FOREIGN KEY (idCargo) REFERENCES negocio.Cargo(id),

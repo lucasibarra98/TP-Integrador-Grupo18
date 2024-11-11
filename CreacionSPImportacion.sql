@@ -150,6 +150,57 @@ BEGIN
 END
 GO
 
+CREATE OR ALTER PROCEDURE importacion.ImportarInformacionComplementaria @ruta VARCHAR(256) AS
+BEGIN
+	-- Medios de pago
+	INSERT INTO ventas.MedioPago VALUES ('Credit card'), ('Cash'), ('Ewallet');
+
+	-- Provincias
+	INSERT INTO negocio.Provincia VALUES ('Buenos Aires'), ('Ciudad Autónoma de Buenos Aires');
+
+	DECLARE @idBuenosAires INT;
+	DECLARE @idCABA INT;
+	SET @idBuenosAires = (SELECT id FROM negocio.Provincia WHERE nombre = 'Buenos Aires'); 
+	SET @idCABA = (SELECT id FROM negocio.Provincia WHERE nombre = 'Ciudad Autónoma de Buenos Aires');
+	
+	-- Ciudades
+	INSERT INTO negocio.Ciudad (nombre, idProvincia, reemplazaPor) VALUES
+		('Ciudad Autónoma de Buenos Aires', @idCABA, NULL),
+		('San Justo', @idBuenosAires, 'Yangon'),
+		('Ramos Mejía', @idBuenosAires, ' Naypyitaw'),
+		('Lomas del Mirador', @idBuenosAires, 'Mandalay'),
+		('San Isidro', @idBuenosAires, NULL),
+		('Hurlingham', @idBuenosAires, NULL),
+		('Avellaneda', @idBuenosAires, NULL),
+		('La Plata', @idBuenosAires, NULL),
+		('Malvinas Argentinas', @idBuenosAires, NULL),
+		('San Justo', @idBuenosAires, NULL),
+		('San Martín', @idBuenosAires, NULL),
+		('Carapachay', @idBuenosAires, NULL),
+		('Chilavert', @idBuenosAires, NULL);
+
+	-- Domicilios
+	INSERT INTO negocio.Domicilio (calle, numero, idCiudad, codigoPostal) VALUES
+		('Av. Brig. Gral. Juan Manuel de Rosas', 3634, (SELECT id FROM negocio.Ciudad WHERE nombre = 'San Justo'), 'B1754'),
+		('Av. de Mayo', 791, (SELECT id FROM negocio.Ciudad WHERE nombre = 'Ramos Mejía'), 'B1704'),
+		('Pres. Juan Domingo Perón', 763, (SELECT id FROM negocio.Ciudad WHERE nombre = 'Lomas del Mirador'), 'B1704'),
+		('Bernardo de Irigoyen', 2647, (SELECT id FROM negocio.Ciudad WHERE nombre = 'San Isidro'), NULL),
+		('Av. Vergara', 1910, (SELECT id FROM negocio.Ciudad WHERE nombre = 'Hurlingham'), NULL),
+		('Av. Belgrano', 422, (SELECT id FROM negocio.Ciudad WHERE nombre = 'Avellaneda'), NULL),
+		('Calle 7 ', 767, (SELECT id FROM negocio.Ciudad WHERE nombre = 'La Plata'), NULL),
+		('Av. Arturo Illia', 3770, (SELECT id FROM negocio.Ciudad WHERE nombre = 'Malvinas Argentinas'), NULL),
+		('Av. Rivadavia', 6538, (SELECT id FROM negocio.Ciudad WHERE nombre = 'Ciudad Autónoma de Buenos Aires'), NULL),
+		('Av. Don Bosco', 2680, (SELECT id FROM negocio.Ciudad WHERE nombre = 'San Justo'), NULL),
+		('Av. Santa Fe', 1954, (SELECT id FROM negocio.Ciudad WHERE nombre = 'Ciudad Autónoma de Buenos Aires'), NULL),
+		('Av. San Martín', 420, (SELECT id FROM negocio.Ciudad WHERE nombre = 'San Martín'), NULL),
+		('Independencia', 3067, (SELECT id FROM negocio.Ciudad WHERE nombre = 'Carapachay'), NULL),
+		('Bernardo de Irigoyen', 2647, (SELECT id FROM negocio.Ciudad WHERE nombre = 'San Isidro'), NULL),
+		('Av. Rivadavia', 2243, (SELECT id FROM negocio.Ciudad WHERE nombre = 'Ciudad Autónoma de Buenos Aires'), NULL),
+		('Juramento', 2971, (SELECT id FROM negocio.Ciudad WHERE nombre = 'Ciudad Autónoma de Buenos Aires'), NULL),
+		('Hipólito Yrigoyen', 299, NULL, NULL),
+		('Lacroze', 5910, (SELECT id FROM negocio.Ciudad WHERE nombre = 'Chilavert'), NULL);
+END
+
 -- Creación de Store Procedures para importar catálogos
 
 CREATE OR ALTER PROCEDURE importacion.ImportarCatalogoCsv @ruta VARCHAR(256) AS
@@ -344,7 +395,7 @@ SET @rutaCatalogoCsv = 'C:\TP\TP_integrador_Archivos\Productos\catalogo.csv'
 SET @rutaCatalogoElectronica = 'C:\TP\TP_integrador_Archivos\Productos\Electronic accessories.xlsx'
 SET @rutaCatalogoImportados = 'C:\TP\TP_integrador_Archivos\Productos\Productos_importados.xlsx'
 
-EXEC importacion.CargarLineasDeProducto @ruta=@rutaInfoComplementaria
+EXEC importacion.ImportarInformacionComplementaria @ruta=@rutaInfoComplementaria
 EXEC importacion.ImportarCatalogoCsv @ruta=@rutaCatalogoCsv
 EXEC importacion.ImportarAccesoriosElectronicos @ruta=@rutaCatalogoElectronica
 EXEC importacion.ImportarProductosImportados @ruta=@rutaCatalogoImportados
