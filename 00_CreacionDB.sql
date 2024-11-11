@@ -99,7 +99,7 @@ GO
 CREATE TABLE productos.Producto
 (
     id INT IDENTITY(1,1),
-    nombre VARCHAR(50) NOT NULL,
+    nombre VARCHAR(50) NOT NULL UNIQUE,
     precioUnitario DECIMAL(10,2) NOT NULL,
     cantidadPorUnidad VARCHAR(30),
 	idLineaProd INT NOT NULL,
@@ -108,7 +108,6 @@ CREATE TABLE productos.Producto
     CONSTRAINT PK_Productos PRIMARY KEY (id),
     CONSTRAINT FK_LineaProd_Prod FOREIGN KEY (idLineaProd) REFERENCES productos.LineaProducto(id),
     CONSTRAINT FK_Proveedor_Prod FOREIGN KEY (idProveedor) REFERENCES productos.Proveedor(id),
-	CONSTRAINT U_Productos UNIQUE (nombre, idProveedor) -- Estamos suponiendo que un mismo producto puede ser distribuido por mas de un proveedor.
 );
 GO
 
