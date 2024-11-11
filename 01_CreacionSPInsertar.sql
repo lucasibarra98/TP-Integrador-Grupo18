@@ -376,7 +376,7 @@ CREATE OR ALTER PROCEDURE ventas.InsertarDetalleFactura
     @cantidad INT,
     @precioUnitario DECIMAL(10,2)
 AS
-BEGINoar existencia de idFactura
+BEGIN
     IF NOT EXISTS (SELECT 1 FROM ventas.Factura WHERE id = @idFactura)
     BEGIN
         PRINT 'Error: El id de la factura no existe.';
@@ -397,7 +397,7 @@ BEGINoar existencia de idFactura
     -- Inserto detalle de factura
     INSERT INTO ventas.DetalleFactura (idFactura, idProducto, cantidad, precioUnitario, subtotal)
     VALUES (@idFactura, @idProducto, @cantidad, @precioUnitario, @subtotal);
-END;
+END
 GO
 
 -- Inserta nota de credito

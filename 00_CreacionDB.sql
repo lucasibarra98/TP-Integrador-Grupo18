@@ -270,7 +270,3 @@ CREATE TABLE ventas.DetalleNotaCredito (
 	CONSTRAINT FK_DetalleNotaCredito_idNotaCredito FOREIGN KEY (idNotaCredito) REFERENCES ventas.NotaCredito(id)
 )
 GO
-
-use master
-go
-drop database Com2900G18
