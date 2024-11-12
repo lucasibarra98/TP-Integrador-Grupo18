@@ -69,7 +69,7 @@ BEGIN
     -- Verifico idLineaProd
     IF NOT EXISTS (SELECT 1 FROM productos.LineaProducto WHERE id = @idLineaProd)
     BEGIN
-        PRINT 'Error: El id de la línea de producto no existe.';
+        PRINT 'Error: El id de la lÃ­nea de producto no existe.';
         RETURN;
     END
 
@@ -356,16 +356,23 @@ CREATE OR ALTER PROCEDURE ventas.InsertarPago
     @idMedioPago INT
 AS
 BEGIN
-	--Verifico idMedioPago
-    IF EXISTS (SELECT 1 FROM ventas.MedioPago WHERE id = @idMedioPago)
-    BEGIN
-        INSERT INTO ventas.Pago (cod, montoTotal, idMedioPago)
-        VALUES (@cod, @montoTotal, @idMedioPago);
-    END
-    ELSE
+    -- Verifico idMedioPago
+    IF NOT EXISTS (SELECT 1 FROM ventas.MedioPago WHERE id = @idMedioPago)
     BEGIN
         PRINT 'Error: El id del medio de pago no existe.';
+        RETURN;
     END
+
+    -- Verifico codigo pago no duplicado
+    IF EXISTS (SELECT 1 FROM ventas.Pago WHERE cod = @cod)
+    BEGIN
+        PRINT 'Error: El codigo de pago ya existe.';
+        RETURN;
+    END
+
+    -- Inserta el registro si todas las condiciones se cumplen
+    INSERT INTO ventas.Pago (cod, montoTotal, idMedioPago)
+    VALUES (@cod, @montoTotal, @idMedioPago);
 END;
 GO
 
@@ -431,7 +438,7 @@ BEGIN
     -- Verifico idNotaCredito
     IF NOT EXISTS (SELECT 1 FROM ventas.NotaCredito WHERE id = @idNotaCredito)
     BEGIN
-        PRINT 'Error: El id de la nota de crédito no existe.';
+        PRINT 'Error: El id de la nota de crÃ©dito no existe.';
         RETURN;
     END
 
@@ -452,7 +459,7 @@ BEGIN
 
     SET @subtotal = @precioUnitario * @cantidad;
 
-    -- Inserto detalle de nota de crédito
+    -- Inserto detalle de nota de crÃ©dito
     INSERT INTO ventas.DetalleNotaCredito (idNotaCredito, idDetalleFactura, cantidad, subtotal)
     VALUES (@idNotaCredito, @idDetalleFactura, @cantidad, @subtotal);
 END;
