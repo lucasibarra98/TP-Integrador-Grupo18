@@ -167,8 +167,8 @@ GO
 CREATE TABLE negocio.Empleado
 (
     id INT IDENTITY(257020,1),
-    nombre VARCHAR(20) NOT NULL,
-    apellido VARCHAR(20) NOT NULL,
+    nombre VARCHAR(100) NOT NULL,
+    apellido VARCHAR(100) NOT NULL,
     dni INT UNIQUE NOT NULL,
     idDomicilio INT NOT NULL,
     emailPersonal VARCHAR(100)NOT NULL,

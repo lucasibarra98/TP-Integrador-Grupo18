@@ -145,7 +145,13 @@ BEGIN
 	RECONFIGURE WITH OVERRIDE;
 	EXEC sp_configure 'show advanced options', 0;
 	RECONFIGURE WITH OVERRIDE;
+
+	-- Cargos
+	INSERT INTO negocio.Cargo (nombre)
+	SELECT DISTINCT cargo 
+	FROM #Empleado WHERE cargo IS NOT NULL
 	
+	-- Empleados
 	INSERT INTO negocio.Empleado
 	SELECT
 		REPLACE(nombre, CHAR(9), ' '),
@@ -166,6 +172,42 @@ BEGIN
 END
 GO
 
+CREATE OR ALTER PROCEDURE importacion.ImportarMediosDePago @ruta VARCHAR(256) AS
+BEGIN
+	DROP TABLE IF EXISTS #MedioDePago;
+	CREATE TABLE #MedioDePago(nombre VARCHAR(50), reemplazarPor VARCHAR(50));
+	
+	DECLARE @tabla VARCHAR(256);
+	DECLARE @hoja VARCHAR(31);
+	SET @tabla = '#MedioDePago';
+	SET @hoja = 'medios de pago';
+
+	DECLARE @sql NVARCHAR(1024);
+
+	EXEC sp_configure 'show advanced options', 1;
+	RECONFIGURE WITH OVERRIDE;
+	EXEC sp_configure 'ad hoc distributed queries', 1;
+	RECONFIGURE WITH OVERRIDE;
+
+	SET @sql = N'
+		INSERT INTO '+ @tabla +'
+			SELECT *
+			FROM OPENROWSET(''Microsoft.ACE.OLEDB.12.0'', ''Excel 12.0; Database=' + @ruta + ';HDR=NO'', ''SELECT * FROM [' + @hoja + '$B3:C5]'')
+	';
+
+	EXEC sp_executesql @sql;
+
+	EXEC sp_configure 'ad hoc distributed queries', 0;
+	RECONFIGURE WITH OVERRIDE;
+	EXEC sp_configure 'show advanced options', 0;
+	RECONFIGURE WITH OVERRIDE;
+
+	-- Insertar Medios de Pago
+	INSERT INTO ventas.MedioPago
+	SELECT * FROM #MedioDePago;
+END
+GO
+
 -- SP para cargar toda la información del archivo de información complementaria
 CREATE OR ALTER PROCEDURE importacion.ImportarInformacionComplementaria @ruta VARCHAR(256) AS
 BEGIN
@@ -173,7 +215,7 @@ BEGIN
 	EXEC importacion.CargarLineasDeProducto @ruta=@ruta
 
 	-- Medios de pago
-	INSERT INTO ventas.MedioPago VALUES ('Credit card'), ('Cash'), ('Ewallet');
+	EXEC importacion.ImportarMediosDePago @ruta=@ruta
 
 	-- Provincias
 	INSERT INTO negocio.Provincia VALUES ('Buenos Aires'), ('Ciudad Autónoma de Buenos Aires');
@@ -217,12 +259,6 @@ BEGIN
 		('Juramento', 2971, (SELECT id FROM negocio.Ciudad WHERE nombre = 'Ciudad Autónoma de Buenos Aires'), NULL),
 		('Av. Presidente Hipólito Yrigoyen', 299, NULL, NULL),
 		('Lacroze', 5910, (SELECT id FROM negocio.Ciudad WHERE nombre = 'Chilavert'), NULL);
-		SELECT * FROM negocio.Domicilio
-	-- Cargos
-	INSERT INTO negocio.Cargo (nombre) VALUES
-		('Cajero'),
-		('Supervisor'),
-		('Gerente de sucursal');
 
 	-- Sucursales
 	INSERT INTO negocio.Sucursal (idDomicilio, horario, telefono) VALUES

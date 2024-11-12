@@ -198,12 +198,12 @@ GO
 
 -- Inserta empleado
 CREATE OR ALTER PROCEDURE negocio.InsertarEmpleado
-    @nombre VARCHAR(20),
-    @apellido VARCHAR(20),
+    @nombre VARCHAR(100),
+    @apellido VARCHAR(100),
     @dni INT,
     @idDomicilio INT,
-    @emailPersonal VARCHAR(50),
-    @emailEmpresa VARCHAR(50),
+    @emailPersonal VARCHAR(100),
+    @emailEmpresa VARCHAR(100),
     @cuil BIGINT,
     @idCargo INT,
     @idSucursal INT,

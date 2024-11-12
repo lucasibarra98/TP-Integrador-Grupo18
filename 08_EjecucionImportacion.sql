@@ -22,6 +22,9 @@ SELECT * FROM productos.Producto WHERE idLineaProd=12
 SELECT * FROM productos.LineaProducto
 SELECT * FROM productos.Producto WHERE nombre LIKE '%Medallones%'
 SELECT * FROM productos.Producto
+SELECT * FROM negocio.Ciudad
+SELECT * FROM negocio.Provincia
 DELETE FROM productos.Producto
+SELECT * FROM ventas.MedioPago
 SELECT * FROM productos.Producto A INNER JOIN productos.Producto B ON A.nombre = B.nombre
 */

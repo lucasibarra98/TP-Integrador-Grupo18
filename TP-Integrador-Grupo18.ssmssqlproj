@@ -61,11 +61,35 @@
           <AssociatedConnUserName />
           <FullPath>03_CreacionSPEliminar.sql</FullPath>
         </FileNode>
-        <FileNode Name="CreacionSPImportacion.sql">
+        <FileNode Name="04_CreacionPruebasInsercion.sql">
           <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:DESKTOP-RMUFN3C\AURORASA:True</AssociatedConnectionMoniker>
           <AssociatedConnSrvName>DESKTOP-RMUFN3C\AURORASA</AssociatedConnSrvName>
           <AssociatedConnUserName />
-          <FullPath>CreacionSPImportacion.sql</FullPath>
+          <FullPath>04_CreacionPruebasInsercion.sql</FullPath>
+        </FileNode>
+        <FileNode Name="05_CreacionPruebasModificacion.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:DESKTOP-RMUFN3C\AURORASA:True</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>DESKTOP-RMUFN3C\AURORASA</AssociatedConnSrvName>
+          <AssociatedConnUserName />
+          <FullPath>05_CreacionPruebasModificacion.sql</FullPath>
+        </FileNode>
+        <FileNode Name="06_VaciarTablas.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:DESKTOP-RMUFN3C\AURORASA:True</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>DESKTOP-RMUFN3C\AURORASA</AssociatedConnSrvName>
+          <AssociatedConnUserName />
+          <FullPath>06_VaciarTablas.sql</FullPath>
+        </FileNode>
+        <FileNode Name="07_CreacionSPImportacion.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:DESKTOP-RMUFN3C\AURORASA:True</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>DESKTOP-RMUFN3C\AURORASA</AssociatedConnSrvName>
+          <AssociatedConnUserName />
+          <FullPath>07_CreacionSPImportacion.sql</FullPath>
+        </FileNode>
+        <FileNode Name="08_EjecucionImportacion.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:DESKTOP-RMUFN3C\AURORASA:True</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>DESKTOP-RMUFN3C\AURORASA</AssociatedConnSrvName>
+          <AssociatedConnUserName />
+          <FullPath>08_EjecucionImportacion.sql</FullPath>
         </FileNode>
       </Items>
     </LogicalFolder>
