@@ -151,8 +151,8 @@ BEGIN
 	-- Empleados
 	INSERT INTO negocio.Empleado
 	SELECT
-		REPLACE(nombre, CHAR(9), ' '),
-		REPLACE(apellido, CHAR(9), ' '),
+		LOWER(REPLACE(nombre, CHAR(9), ' ')),
+		LOWER(REPLACE(apellido, CHAR(9), ' ')),
 		CAST(dni AS INT), 
 		(SELECT id FROM negocio.Domicilio 
 			WHERE calle = LEFT(TRIM(LEFT(direccion, PATINDEX('%,%', direccion) - 1)), LEN(TRIM(LEFT(direccion, PATINDEX('%,%', direccion) - 1))) - PATINDEX('% %', REVERSE(TRIM(LEFT(direccion, PATINDEX('%,%', direccion) - 1)))))
