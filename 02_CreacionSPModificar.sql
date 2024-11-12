@@ -17,7 +17,7 @@ BEGIN
     END
     ELSE
     BEGIN
-        PRINT 'Error: El id de la línea de producto no existe.';
+        PRINT 'Error: El id de la lÃ­nea de producto no existe.';
     END
 END;
 GO
@@ -38,7 +38,7 @@ BEGIN
     END
     ELSE
     BEGIN
-        PRINT 'Error: El id de la categoría o de la linea de producto no existe.';
+        PRINT 'Error: El id de la categorÃ­a o de la linea de producto no existe.';
     END
 END;
 GO
@@ -83,7 +83,7 @@ BEGIN
 	--Verifico idLineaProducto
     IF NOT EXISTS (SELECT 1 FROM productos.LineaProducto WHERE id = @idLineaProd)
     BEGIN
-        PRINT 'Error: El id de la línea de producto no existe.';
+        PRINT 'Error: El id de la lÃ­nea de producto no existe.';
         RETURN;
     END
 
@@ -294,7 +294,8 @@ GO
 --Modifico Medio Pago
 CREATE OR ALTER PROCEDURE ventas.ModificarMedioPago
     @id INT,
-    @nombre VARCHAR(50)
+    @nombre VARCHAR(50),
+    @reemplazaPor VARCHAR(50)
 AS
 BEGIN
 	--Verifico Medio Pago
@@ -305,7 +306,8 @@ BEGIN
     END
 
     UPDATE ventas.MedioPago
-    SET nombre = @nombre
+    SET nombre = @nombre,
+	reemplazaPor = @reemplazaPor
     WHERE id = @id;
 END;
 GO
