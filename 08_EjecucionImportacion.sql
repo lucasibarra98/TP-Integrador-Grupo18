@@ -30,4 +30,5 @@ SELECT * FROM productos.Producto A INNER JOIN productos.Producto B ON A.nombre =
 SELECT * FROM importacion.ErroresCatalogoProductosImportados
 SELECT * FROM importacion.ErroresCatalogoAccesoriosElectronicos
 SELECT * FROM importacion.ErroresCatalogoCsv
+SELECT * FROM negocio.Sucursal
 */
