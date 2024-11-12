@@ -205,6 +205,31 @@ BEGIN
 END
 GO
 
+CREATE OR ALTER PROCEDURE importacion.ImportarSucursal @ruta VARCHAR(256) AS
+BEGIN
+	DROP TABLE IF EXISTS #Sucursal;
+	CREATE TABLE #Sucursal(ciudad VARCHAR(50), reemplazarPor VARCHAR(50), direccion VARCHAR(100), horario VARCHAR(100), telefono CHAR(9));
+	
+	DECLARE @tabla VARCHAR(256);
+	DECLARE @hoja VARCHAR(31);
+	SET @tabla = '#Sucursal';
+	SET @hoja = 'sucursal';
+
+	DECLARE @sql NVARCHAR(1024);
+
+	EXEC importacion.ImportarXlsx @tabla=@tabla, @hoja=@hoja, @ruta=@ruta
+
+	-- Sucursales
+	INSERT INTO negocio.Sucursal (idDomicilio, horario, telefono)
+	SELECT (SELECT id FROM negocio.Domicilio 
+		WHERE calle = LEFT(TRIM(LEFT(direccion, PATINDEX('%,%', direccion) - 1)), LEN(TRIM(LEFT(direccion, PATINDEX('%,%', direccion) - 1))) - PATINDEX('% %', REVERSE(TRIM(LEFT(direccion, PATINDEX('%,%', direccion) - 1)))))
+		AND numero = LEFT(RIGHT(TRIM(LEFT(direccion, PATINDEX('%,%', direccion))), PATINDEX('% %', REVERSE(direccion))), LEN(RIGHT(TRIM(LEFT(direccion, PATINDEX('%,%', direccion))), PATINDEX('% %', REVERSE(direccion)))) - 2)), 
+		horario,
+		telefono
+	FROM #Sucursal
+END
+GO
+
 -- SP para cargar toda la información del archivo de información complementaria
 CREATE OR ALTER PROCEDURE importacion.ImportarInformacionComplementaria @ruta VARCHAR(256) AS
 BEGIN
@@ -257,11 +282,8 @@ BEGIN
 		('Av. Presidente Hipólito Yrigoyen', 299, NULL, NULL),
 		('Lacroze', 5910, (SELECT id FROM negocio.Ciudad WHERE nombre = 'Chilavert'), NULL);
 
-	-- Sucursales
-	INSERT INTO negocio.Sucursal (idDomicilio, horario, telefono) VALUES
-		((SELECT id FROM negocio.Domicilio WHERE calle = 'Av. Brig. Gral. Juan Manuel de Rosas' AND numero = 3634), 'L a V 8 a. m.–9 p. m.', '5555-5551'),
-		((SELECT id FROM negocio.Domicilio WHERE calle = 'Av. de Mayo' AND numero = 791), 'L a V 8 a. m.–9 p. m.', '5555-5552'),
-		((SELECT id FROM negocio.Domicilio WHERE calle = 'Pres. Juan Domingo Perón' AND numero = 763), 'L a V 8 a. m.–9 p. m.', '5555-5553');
+	-- Importación de sucursal
+	EXEC importacion.ImportarSucursal @ruta=@ruta
 
 	-- Importación de empleados
 	EXEC importacion.ImportarEmpleados @ruta=@ruta		

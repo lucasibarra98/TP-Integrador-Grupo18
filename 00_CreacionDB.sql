@@ -279,6 +279,7 @@ GO
 -- SCHEMA importacion
 
 CREATE TABLE importacion.ErroresCatalogoProductosImportados(
+	productId INT IDENTITY(1,1) PRIMARY KEY,
 	IdProducto VARCHAR(30),
 	NombreProducto VARCHAR(50),
 	Proveedor VARCHAR(50),
@@ -289,13 +290,15 @@ CREATE TABLE importacion.ErroresCatalogoProductosImportados(
 );
 
 CREATE TABLE importacion.ErroresCatalogoAccesoriosElectronicos(
+	productId INT IDENTITY(1,1) PRIMARY KEY,
 	Product VARCHAR(30),
 	PrecioUnitarioEnDolares VARCHAR(50),
 	fechaHoraError DATETIME
 );
 
 CREATE TABLE importacion.ErroresCatalogoCsv (
-	id VARCHAR(30) primary key,
+	productId INT IDENTITY(1,1) PRIMARY KEY,
+	id VARCHAR(30),
 	category VARCHAR(50),
 	name VARCHAR(100),
 	price VARCHAR(30),
