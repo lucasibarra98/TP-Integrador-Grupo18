@@ -102,8 +102,8 @@ GO
 --SCHEMA VENTAS
 
 --Medio Pago
-EXEC ventas.ModificarMedioPago @id = 1, @nombre = 'QR';
-EXEC ventas.ModificarMedioPago @id = 99, @nombre = 'Bitcoin'; -- id inexistente
+EXEC ventas.ModificarMedioPago @id = 1, @nombre = 'QR', @reemplazaPor = NULL;
+EXEC ventas.ModificarMedioPago @id = 99, @nombre = 'Bitcoin', @reemplazaPor = NULL; -- id inexistente
 SELECT * FROM ventas.MedioPago;
 GO
 
