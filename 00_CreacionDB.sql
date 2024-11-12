@@ -67,6 +67,10 @@ GO
 CREATE SCHEMA negocio;
 GO
 
+
+CREATE SCHEMA importacion
+GO
+
 									-----------TABLAS-----------
 -- SCHEMA productos
 CREATE TABLE productos.LineaProducto
@@ -271,3 +275,32 @@ CREATE TABLE ventas.DetalleNotaCredito (
 	CONSTRAINT FK_DetalleNotaCredito_idNotaCredito FOREIGN KEY (idNotaCredito) REFERENCES ventas.NotaCredito(id)
 )
 GO
+
+-- SCHEMA importacion
+
+CREATE TABLE importacion.ErroresCatalogoProductosImportados(
+	IdProducto VARCHAR(30),
+	NombreProducto VARCHAR(50),
+	Proveedor VARCHAR(50),
+	Categoría VARCHAR(30),
+	CantidadPorUnidad VARCHAR(30),
+	PrecioUnidad VARCHAR(30),
+	fechaHoraError DATETIME
+);
+
+CREATE TABLE importacion.ErroresCatalogoAccesoriosElectronicos(
+	Product VARCHAR(30),
+	PrecioUnitarioEnDolares VARCHAR(50),
+	fechaHoraError DATETIME
+);
+
+CREATE TABLE importacion.ErroresCatalogoCsv (
+	id VARCHAR(30) primary key,
+	category VARCHAR(50),
+	name VARCHAR(100),
+	price VARCHAR(30),
+	reference_price VARCHAR(30),
+	reference_unit VARCHAR(30),
+	date VARCHAR(30),
+	fechaHoraError DATETIME
+);

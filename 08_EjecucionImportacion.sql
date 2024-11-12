@@ -27,4 +27,7 @@ SELECT * FROM negocio.Provincia
 DELETE FROM productos.Producto
 SELECT * FROM ventas.MedioPago
 SELECT * FROM productos.Producto A INNER JOIN productos.Producto B ON A.nombre = B.nombre
+SELECT * FROM importacion.ErroresCatalogoProductosImportados
+SELECT * FROM importacion.ErroresCatalogoAccesoriosElectronicos
+SELECT * FROM importacion.ErroresCatalogoCsv
 */

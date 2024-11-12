@@ -25,9 +25,6 @@ Entrega 4
 USE Com2900G18;
 GO
 
-CREATE SCHEMA importacion
-GO
-
 -- Creación de Store Procedures para importar xlsx y csv de forma genérica
 
 CREATE OR ALTER PROCEDURE importacion.ImportarXlsx @ruta VARCHAR(256), @hoja VARCHAR(31), @tabla VARCHAR(256) AS
@@ -277,7 +274,6 @@ CREATE OR ALTER PROCEDURE importacion.ImportarCatalogoCsv @ruta VARCHAR(256) AS
 BEGIN
 	DROP TABLE IF EXISTS #CatalogoCsv;
 	CREATE TABLE #CatalogoCsv (id VARCHAR(30) primary key, category VARCHAR(50), name VARCHAR(100), price VARCHAR(30), reference_price VARCHAR(30), reference_unit VARCHAR(30), date VARCHAR(30));
-	CREATE TABLE #ErroresCatalogoCsv (id VARCHAR(30) primary key, category VARCHAR(50), name VARCHAR(100), price VARCHAR(30), reference_price VARCHAR(30), reference_unit VARCHAR(30), date VARCHAR(30), fechaHoraError DATETIME);
 
 	DECLARE @catalogo CHAR(3);
 	SET @catalogo = 'CSV';
@@ -300,7 +296,7 @@ BEGIN
 	)
 	
 	-- Insertar en tabla de errores
-	INSERT INTO #ErroresCatalogoCsv
+	INSERT INTO importacion.ErroresCatalogoCsv
 	SELECT id, category, cc.name, price, reference_price, reference_unit, date, GETDATE()
 	FROM #CatalogoCsv AS cc INNER JOIN Duplicado AS d ON cc.name = d.name;
 
@@ -308,7 +304,7 @@ BEGIN
 	DELETE FROM #CatalogoCsv
 	WHERE name IN (
 		SELECT name
-		FROM #ErroresCatalogoCsv
+		FROM importacion.ErroresCatalogoCsv
 	);
 
 	-- Borrado lógico para los productos que no están incluídos en el catálogo actualizado
@@ -334,7 +330,6 @@ CREATE OR ALTER PROCEDURE importacion.ImportarAccesoriosElectronicos @ruta VARCH
 BEGIN
 	DROP TABLE IF EXISTS #CatalogoAccesoriosElectronicos;
 	CREATE TABLE #CatalogoAccesoriosElectronicos(Product VARCHAR(30), PrecioUnitarioEnDolares VARCHAR(50));
-	CREATE TABLE #ErroresCatalogoAccesoriosElectronicos(Product VARCHAR(30), PrecioUnitarioEnDolares VARCHAR(50), fechaHoraError DATETIME);
 
 	DECLARE @catalogo CHAR(3);
 	SET @catalogo = 'ELE';
@@ -356,7 +351,7 @@ BEGIN
 	)
 	
 	-- Insertar en tabla de errores
-	INSERT INTO #ErroresCatalogoAccesoriosElectronicos
+	INSERT INTO importacion.ErroresCatalogoAccesoriosElectronicos
 	SELECT cae.Product, PrecioUnitarioEnDolares, GETDATE()
 	FROM #CatalogoAccesoriosElectronicos AS cae INNER JOIN Duplicado AS d ON cae.Product = d.Product;
 
@@ -364,7 +359,7 @@ BEGIN
 	DELETE FROM #CatalogoAccesoriosElectronicos
 	WHERE Product IN (
 		SELECT Product
-		FROM #ErroresCatalogoAccesoriosElectronicos
+		FROM importacion.ErroresCatalogoAccesoriosElectronicos
 	);
 
 	-- Borrado lógico para los productos que no están incluídos en el catálogo actualizado
@@ -390,7 +385,6 @@ CREATE OR ALTER PROCEDURE importacion.ImportarProductosImportados @ruta VARCHAR(
 BEGIN
 	DROP TABLE IF EXISTS #CatalogoProductosImportados;
 	CREATE TABLE #CatalogoProductosImportados(IdProducto VARCHAR(30), NombreProducto VARCHAR(50), Proveedor VARCHAR(50), Categoría VARCHAR(30), CantidadPorUnidad VARCHAR(30), PrecioUnidad VARCHAR(30));
-	CREATE TABLE #ErroresCatalogoProductosImportados(IdProducto VARCHAR(30), NombreProducto VARCHAR(50), Proveedor VARCHAR(50), Categoría VARCHAR(30), CantidadPorUnidad VARCHAR(30), PrecioUnidad VARCHAR(30), fechaHoraError DATETIME);
 
 	DECLARE @catalogo CHAR(3);
 	SET @catalogo = 'IMP';
@@ -412,7 +406,7 @@ BEGIN
 	)
 	
 	-- Insertar en tabla de errores
-	INSERT INTO #ErroresCatalogoProductosImportados
+	INSERT INTO importacion.ErroresCatalogoProductosImportados
 	SELECT IdProducto, cpi.NombreProducto, Proveedor, Categoría, CantidadPorUnidad, PrecioUnidad, GETDATE()
 	FROM #CatalogoProductosImportados AS cpi INNER JOIN Duplicado AS d ON cpi.NombreProducto = d.NombreProducto;
 
@@ -420,7 +414,7 @@ BEGIN
 	DELETE FROM #CatalogoProductosImportados
 	WHERE NombreProducto IN (
 		SELECT NombreProducto
-		FROM #ErroresCatalogoProductosImportados
+		FROM importacion.ErroresCatalogoProductosImportados
 	);
 
 	-- Borrado lógico para los productos que no están incluídos en el catálogo actualizado
