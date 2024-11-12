@@ -448,8 +448,8 @@ BEGIN
 	WHERE NOT EXISTS(SELECT 1 FROM productos.Proveedor WHERE nombre = Proveedor)
 	
 	-- Insertar los que no tienen duplicados
-	INSERT INTO productos.Producto (nombre, precioUnitario, idLineaProd, idProveedor, catalogo)
-		SELECT NombreProducto, CAST(PrecioUnidad AS DECIMAL(10, 2)), @idLineaProdImportados, (SELECT id FROM productos.Proveedor WHERE nombre = cpi.Proveedor), @catalogo
+	INSERT INTO productos.Producto (nombre, precioUnitario, cantidadPorUnidad, idLineaProd, idProveedor, catalogo)
+		SELECT NombreProducto, CAST(PrecioUnidad AS DECIMAL(10, 2)), CantidadPorUnidad, @idLineaProdImportados, (SELECT id FROM productos.Proveedor WHERE nombre = cpi.Proveedor), @catalogo
 		FROM #CatalogoProductosImportados AS cpi
 		WHERE NOT EXISTS (SELECT 1 FROM productos.Producto WHERE nombre = cpi.NombreProducto);
 END
