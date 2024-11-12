@@ -219,14 +219,19 @@ BEGIN
 
 	EXEC importacion.ImportarXlsx @tabla=@tabla, @hoja=@hoja, @ruta=@ruta
 
+	-- Cargar ciudades para reemplazarPor
+	UPDATE negocio.Ciudad
+	SET reemplazaPor = S.ciudad FROM negocio.Ciudad C INNER JOIN #Sucursal S ON S.reemplazarPor COLLATE Modern_Spanish_CI_AI = C.nombre
+
 	-- Sucursales
 	INSERT INTO negocio.Sucursal (idDomicilio, horario, telefono)
-	SELECT (SELECT id FROM negocio.Domicilio 
-		WHERE calle = LEFT(TRIM(LEFT(direccion, PATINDEX('%,%', direccion) - 1)), LEN(TRIM(LEFT(direccion, PATINDEX('%,%', direccion) - 1))) - PATINDEX('% %', REVERSE(TRIM(LEFT(direccion, PATINDEX('%,%', direccion) - 1)))))
-		AND numero = LEFT(RIGHT(TRIM(LEFT(direccion, PATINDEX('%,%', direccion))), PATINDEX('% %', REVERSE(direccion))), LEN(RIGHT(TRIM(LEFT(direccion, PATINDEX('%,%', direccion))), PATINDEX('% %', REVERSE(direccion)))) - 2)), 
+	SELECT (SELECT id
+		FROM negocio.Domicilio 
+		WHERE calle = REPLACE(LEFT(direccion, PATINDEX('%[1-9]%', direccion) - 1), CHAR(160), '')
+		AND numero = SUBSTRING(direccion, PATINDEX('%[1-9]%', direccion), PATINDEX('%,%', direccion) - PATINDEX('%[1-9]%', direccion))),
 		horario,
 		telefono
-	FROM #Sucursal
+	FROM #Sucursal WHERE direccion IS NOT NULL
 END
 GO
 
@@ -248,19 +253,19 @@ BEGIN
 	SET @idCABA = (SELECT id FROM negocio.Provincia WHERE nombre = 'Ciudad Autónoma de Buenos Aires');
 	
 	-- Ciudades
-	INSERT INTO negocio.Ciudad (nombre, idProvincia, reemplazaPor) VALUES
-		('Ciudad Autónoma de Buenos Aires', @idCABA, NULL),
-		('San Justo', @idBuenosAires, 'Yangon'),
-		('Ramos Mejía', @idBuenosAires, ' Naypyitaw'),
-		('Lomas del Mirador', @idBuenosAires, 'Mandalay'),
-		('San Isidro', @idBuenosAires, NULL),
-		('Hurlingham', @idBuenosAires, NULL),
-		('Avellaneda', @idBuenosAires, NULL),
-		('La Plata', @idBuenosAires, NULL),
-		('Malvinas Argentinas', @idBuenosAires, NULL),
-		('San Martín', @idBuenosAires, NULL),
-		('Carapachay', @idBuenosAires, NULL),
-		('Chilavert', @idBuenosAires, NULL);
+	INSERT INTO negocio.Ciudad (nombre, idProvincia) VALUES
+		('Ciudad Autónoma de Buenos Aires', @idCABA),
+		('San Justo', @idBuenosAires),
+		('Ramos Mejía', @idBuenosAires),
+		('Lomas del Mirador', @idBuenosAires),
+		('San Isidro', @idBuenosAires),
+		('Hurlingham', @idBuenosAires),
+		('Avellaneda', @idBuenosAires),
+		('La Plata', @idBuenosAires),
+		('Malvinas Argentinas', @idBuenosAires),
+		('San Martín', @idBuenosAires),
+		('Carapachay', @idBuenosAires),
+		('Chilavert', @idBuenosAires);
 		
 	-- Domicilios
 	INSERT INTO negocio.Domicilio (calle, numero, idCiudad, codigoPostal) VALUES
