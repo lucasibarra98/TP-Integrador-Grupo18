@@ -105,33 +105,6 @@ BEGIN
 END;
 GO
 
-CREATE OR ALTER PROCEDURE importacion.ImportarSucursalesYDomicilios @ruta VARCHAR(256) AS
-BEGIN
-	DROP TABLE IF EXISTS #Sucursal;
-	CREATE TABLE #Sucursal(ciudad VARCHAR(50), reemplazarPor VARCHAR(50), direccion VARCHAR(100), horario VARCHAR(100), telefono CHAR(9));
-
-	EXEC importacion.ImportarXlsx @ruta=@ruta, @hoja='sucursal', @tabla='#Sucursal';
-
-	WITH CTE AS(
-		SELECT *, ROW_NUMBER() OVER (ORDER BY ciudad) AS fila
-		FROM #Sucursal CROSS APPLY string_split(direccion, ',')
-	)
-	SELECT *
-	FROM CTE
-	WHERE fila % 2 = 0
-	--WHERE (3 * fila + 1) % fila = 0
-	/*
-	INSERT INTO negocio.Ciudad
-	SELECT *, ROW_NUMBER()
-	FROM STRING_SPLIT(*/
-END
-GO
-/*
-DECLARE @asd VARCHAR(100)
-SET @asd = 'C:\TP\TP_integrador_Archivos\Informacion_complementaria.xlsx'
-EXEC importacion.ImportarSucursalesYDomicilios @ruta=@asd
-GO
-*/
 CREATE OR ALTER PROCEDURE importacion.ImportarEmpleados @ruta VARCHAR(256) AS
 BEGIN
 	DROP TABLE IF EXISTS #Empleado;
@@ -188,18 +161,17 @@ BEGIN
 		(SELECT id FROM negocio.Cargo WHERE nombre=cargo),
 		(SELECT id FROM negocio.Sucursal WHERE idDomicilio = (SELECT TOP 1 id FROM negocio.Domicilio WHERE idCiudad = (SELECT id FROM negocio.Ciudad WHERE nombre COLLATE Modern_Spanish_CI_AI = ciudad))),
 		turno
-	FROM #Empleado AS e;
+	FROM #Empleado AS e
+	WHERE nombre IS NOT NULL;
 END
 GO
 
-/*
-EXEC importacion.ImportarEmpleados @ruta='C:\TP\TP_integrador_Archivos\Informacion_complementaria.xlsx'
-SELECT * FROM negocio.Sucursal
-SELECT * FROM negocio.Domicilio WHERE id = 46 OR id = 47 OR id = 48
-SELECT * FROM negocio.Ciudad*/
-
+-- SP para cargar toda la información del archivo de información complementaria
 CREATE OR ALTER PROCEDURE importacion.ImportarInformacionComplementaria @ruta VARCHAR(256) AS
 BEGIN
+	-- Importación de Líneas de producto
+	EXEC importacion.CargarLineasDeProducto @ruta=@ruta
+
 	-- Medios de pago
 	INSERT INTO ventas.MedioPago VALUES ('Credit card'), ('Cash'), ('Ewallet');
 
@@ -243,9 +215,9 @@ BEGIN
 		('Independencia', 3067, (SELECT id FROM negocio.Ciudad WHERE nombre = 'Carapachay'), NULL),
 		('Av. Rivadavia', 2243, (SELECT id FROM negocio.Ciudad WHERE nombre = 'Ciudad Autónoma de Buenos Aires'), NULL),
 		('Juramento', 2971, (SELECT id FROM negocio.Ciudad WHERE nombre = 'Ciudad Autónoma de Buenos Aires'), NULL),
-		('Hipólito Yrigoyen', 299, NULL, NULL),
+		('Av. Presidente Hipólito Yrigoyen', 299, NULL, NULL),
 		('Lacroze', 5910, (SELECT id FROM negocio.Ciudad WHERE nombre = 'Chilavert'), NULL);
-
+		SELECT * FROM negocio.Domicilio
 	-- Cargos
 	INSERT INTO negocio.Cargo (nombre) VALUES
 		('Cajero'),
@@ -258,6 +230,7 @@ BEGIN
 		((SELECT id FROM negocio.Domicilio WHERE calle = 'Av. de Mayo' AND numero = 791), 'L a V 8 a. m.–9 p. m.', '5555-5552'),
 		((SELECT id FROM negocio.Domicilio WHERE calle = 'Pres. Juan Domingo Perón' AND numero = 763), 'L a V 8 a. m.–9 p. m.', '5555-5553');
 
+	-- Importación de empleados
 	EXEC importacion.ImportarEmpleados @ruta=@ruta		
 END
 GO
@@ -445,27 +418,3 @@ BEGIN
 		WHERE NOT EXISTS (SELECT 1 FROM productos.Producto WHERE nombre = cpi.NombreProducto);
 END
 GO
-
-DECLARE @rutaInfoComplementaria VARCHAR(256)
-DECLARE @rutaCatalogoCsv VARCHAR(256)
-DECLARE @rutaCatalogoElectronica VARCHAR(256)
-DECLARE @rutaCatalogoImportados VARCHAR(256)
-
-SET @rutaInfoComplementaria = 'C:\TP\TP_integrador_Archivos\Informacion_complementaria.xlsx'
-SET @rutaCatalogoCsv = 'C:\TP\TP_integrador_Archivos\Productos\catalogo.csv'
-SET @rutaCatalogoElectronica = 'C:\TP\TP_integrador_Archivos\Productos\Electronic accessories.xlsx'
-SET @rutaCatalogoImportados = 'C:\TP\TP_integrador_Archivos\Productos\Productos_importados.xlsx'
-
---EXEC importacion.ImportarInformacionComplementaria @ruta=@rutaInfoComplementaria
-EXEC importacion.ImportarCatalogoCsv @ruta=@rutaCatalogoCsv
-EXEC importacion.ImportarAccesoriosElectronicos @ruta=@rutaCatalogoElectronica
-EXEC importacion.ImportarProductosImportados @ruta=@rutaCatalogoImportados
-
-/*
-SELECT * FROM productos.Producto WHERE idLineaProd=12
-SELECT * FROM productos.LineaProducto
-SELECT * FROM productos.Producto WHERE nombre LIKE '%Medallones%'
-SELECT * FROM productos.Producto
-DELETE FROM productos.Producto
-SELECT * FROM productos.Producto A INNER JOIN productos.Producto B ON A.nombre = B.nombre
-*/
