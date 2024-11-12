@@ -5,12 +5,12 @@ GO
 
 --Linea Producto
 -- Sin errores
-EXEC productos.InsertarLineaProducto @nombre = 'ElectrÛnica';
+EXEC productos.InsertarLineaProducto @nombre = 'Electr√≥nica';
 EXEC productos.InsertarLineaProducto @nombre = 'Hogar';
 EXEC productos.InsertarLineaProducto @nombre = 'Oficina';
 
 -- Error (nombre duplicado)
-EXEC productos.InsertarLineaProducto @nombre = 'ElectrÛnica';
+EXEC productos.InsertarLineaProducto @nombre = 'Electr√≥nica';
 
 -- Verifico
 SELECT * FROM productos.LineaProducto;
@@ -73,7 +73,7 @@ GO
 --Ciudad
 -- Sin errores
 EXEC negocio.InsertarCiudad @nombre = 'La Plata', @reemplazaPor = NULL, @idProvincia = 1;
-EXEC negocio.InsertarCiudad @nombre = 'CÛrdoba', @reemplazaPor = NULL, @idProvincia = 2;
+EXEC negocio.InsertarCiudad @nombre = 'C√≥rdoba', @reemplazaPor = NULL, @idProvincia = 2;
 
 -- Error (nombre duplicado, idProvincia no existe)
 EXEC negocio.InsertarCiudad @nombre = 'La Plata', @reemplazaPor = NULL, @idProvincia = 1; 
@@ -125,33 +125,33 @@ GO
 --Empleado
 -- Sin errores
 EXEC negocio.InsertarEmpleado 
-    @nombre = 'Juan', @apellido = 'PÈrez', @dni = 12345678, @idDomicilio = 1, 
+    @nombre = 'Juan', @apellido = 'P√©rez', @dni = 12345678, @idDomicilio = 1, 
     @emailPersonal = 'juan.perez@gmail.com', @emailEmpresa = 'juan.perez@empresa.com', 
     @cuil = 20123456789, @idCargo = 1, @idSucursal = 1, @turno = 'TM';
 
 EXEC negocio.InsertarEmpleado 
-    @nombre = 'Ana', @apellido = 'LÛpez', @dni = 87654321, @idDomicilio = 2, 
+    @nombre = 'Ana', @apellido = 'L√≥pez', @dni = 87654321, @idDomicilio = 2, 
     @emailPersonal = 'ana.lopez@gmail.com', @emailEmpresa = 'ana.lopez@empresa.com', 
     @cuil = 20876543210, @idCargo = 2, @idSucursal = 2, @turno = 'TT';
 
 EXEC negocio.InsertarEmpleado 
-    @nombre = 'Carlos', @apellido = 'RamÌrez', @dni = 11223344, @idDomicilio = 3, 
+    @nombre = 'Carlos', @apellido = 'Ram√≠rez', @dni = 11223344, @idDomicilio = 3, 
     @emailPersonal = 'carlos.ramirez@gmail.com', @emailEmpresa = 'carlos.ramirez@empresa.com', 
     @cuil = 20112233445, @idCargo = 3, @idSucursal = 3, @turno = 'Jornada Completa';
 
 -- Error
 EXEC negocio.InsertarEmpleado 
-    @nombre = 'Mario', @apellido = 'Gonz·lez', @dni = 22334455, @idDomicilio = 99, 
+    @nombre = 'Mario', @apellido = 'Gonz√°lez', @dni = 22334455, @idDomicilio = 99, 
     @emailPersonal = 'mario.gonzalez@gmail.com', @emailEmpresa = 'mario.gonzalez@empresa.com', 
     @cuil = 20223344556, @idCargo = 1, @idSucursal = 1, @turno = 'TM'; -- idDomicilio inexistente
 
 EXEC negocio.InsertarEmpleado 
-    @nombre = 'LucÌa', @apellido = 'MartÌnez', @dni = 33445566, @idDomicilio = 1, 
+    @nombre = 'Luc√≠a', @apellido = 'Mart√≠nez', @dni = 33445566, @idDomicilio = 1, 
     @emailPersonal = 'lucia.martinez@gmail.com', @emailEmpresa = 'lucia.martinez@empresa.com', 
     @cuil = 20334455667, @idCargo = 99, @idSucursal = 1, @turno = 'TT'; -- idCargo inexistente
 
 EXEC negocio.InsertarEmpleado 
-    @nombre = 'Ra˙l', @apellido = 'Fern·ndez', @dni = 44556677, @idDomicilio = 2, 
+    @nombre = 'Ra√∫l', @apellido = 'Fern√°ndez', @dni = 44556677, @idDomicilio = 2, 
     @emailPersonal = 'raul.fernandez@gmail.com', @emailEmpresa = 'raul.fernandez@empresa.com', 
     @cuil = 20445566778, @idCargo = 2, @idSucursal = 99, @turno = 'TT'; -- idSucursal inexistente
 
@@ -167,6 +167,7 @@ GO
 EXEC ventas.InsertarMedioPago @nombre = 'Efectivo';
 EXEC ventas.InsertarMedioPago @nombre = 'Tarjeta de Credito';
 EXEC ventas.InsertarMedioPago @nombre = 'Transferencia Bancaria';
+EXEC ventas.InsertarMedioPago @nombre = 'Criptomonedas';
 
 -- Error (nombre duplicado)
 EXEC ventas.InsertarMedioPago @nombre = 'Efectivo';
@@ -207,8 +208,7 @@ EXEC ventas.InsertarPago @cod = 'PA-001', @montoTotal = 500.00, @idMedioPago = 1
 EXEC ventas.InsertarPago @cod = 'PA-002', @montoTotal = 750.00, @idMedioPago = 2;
 EXEC ventas.InsertarPago @cod = 'PA-004', @montoTotal = 750.00, @idMedioPago = 3;
 
--- Error (codigo duplicado es UNIQUE, idMedioPago no existe)
-EXEC ventas.InsertarPago @cod = 'PA-001', @montoTotal = 100.00, @idMedioPago = 1; 
+-- Error (idMedioPago no existe) 
 EXEC ventas.InsertarPago @cod = 'PA-003', @montoTotal = 200.00, @idMedioPago = 99; 
 
 -- Verifico
@@ -242,8 +242,8 @@ GO
 
 --Detalle Factura
 -- Sin errores
-EXEC ventas.InsertarDetalleFactura @idFactura = 2, @idProducto = 1, @cantidad = 2, @precioUnitario = 250.00;
-EXEC ventas.InsertarDetalleFactura @idFactura = 3, @idProducto = 2, @cantidad = 1, @precioUnitario = 750.00;
+EXEC ventas.InsertarDetalleFactura @idFactura = 1, @idProducto = 1, @cantidad = 2, @precioUnitario = 250.00;
+EXEC ventas.InsertarDetalleFactura @idFactura = 2, @idProducto = 2, @cantidad = 1, @precioUnitario = 750.00;
 
 -- Error (idProducto, idFactura no existen)
 EXEC ventas.InsertarDetalleFactura @idFactura = 99, @idProducto = 1, @cantidad = 3, @precioUnitario = 100.00; 
@@ -255,8 +255,8 @@ GO
 
 --Nota Credito
 -- Sin errores
-EXEC ventas.InsertarNotaCredito @idFactura = 2, @fecha = '2024-11-15', @total = 150.00, @motivo = 'Devolucion parcial';
-EXEC ventas.InsertarNotaCredito @idFactura = 3, @fecha = '2024-11-16', @total = 250.00, @motivo = 'Descuento especial';
+EXEC ventas.InsertarNotaCredito @idFactura = 1, @fecha = '2024-11-15', @total = 150.00, @motivo = 'Devolucion parcial';
+EXEC ventas.InsertarNotaCredito @idFactura = 2, @fecha = '2024-11-16', @total = 250.00, @motivo = 'Descuento especial';
 
 -- Error (idFactura no existe)
 EXEC ventas.InsertarNotaCredito @idFactura = 99, @fecha = '2024-11-17', @total = 100.00, @motivo = 'Devolucion'; 
@@ -268,11 +268,11 @@ GO
 --Detalle Nota Credito
 -- Sin errores
 EXEC ventas.InsertarDetalleNotaCredito @idNotaCredito = 1, @idDetalleFactura = 1, @cantidad = 1;
-EXEC ventas.InsertarDetalleNotaCredito @idNotaCredito = 3, @idDetalleFactura = 2, @cantidad = 1;
+EXEC ventas.InsertarDetalleNotaCredito @idNotaCredito = 2, @idDetalleFactura = 2, @cantidad = 1;
 
 -- Error (idNotaCredito, idFactura no existen)
 EXEC ventas.InsertarDetalleNotaCredito @idNotaCredito = 99, @idDetalleFactura = 1, @cantidad = 1; 
-EXEC ventas.InsertarDetalleNotaCredito @idNotaCredito = 3, @idDetalleFactura = 99, @cantidad = 1; 
+EXEC ventas.InsertarDetalleNotaCredito @idNotaCredito = 2, @idDetalleFactura = 99, @cantidad = 1; 
 
 -- Verifico
 SELECT * FROM ventas.DetalleNotaCredito;
