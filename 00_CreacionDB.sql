@@ -1,32 +1,32 @@
 /*
 	Pautas generales para el desarrollo del TP
 
-	ï Documente las correcciones que haga indicando n˙mero de lÌnea, contenido previo y
-	contenido nuevo. Esto se cotejar· para constatar que cumpla correctamente la
+	‚Ä¢ Documente las correcciones que haga indicando n√∫mero de l√≠nea, contenido previo y
+	contenido nuevo. Esto se cotejar√° para constatar que cumpla correctamente la
 	consigna.
-	ï El cÛdigo fuente no debe incluir referencias hardcodeadas a nombres o ubicaciones
-	de archivo. Esto debe permitirse ser provisto por par·metro en la invocaciÛn. En el
-	cÛdigo de ejemplo el grupo decidir· dÛnde se ubicarÌan los archivos. Esto debe
-	aparecer en comentarios del mÛdulo.
-	ï Adicionalmente se requiere que el sistema sea capaz de generar un archivo XML
+	‚Ä¢ El c√≥digo fuente no debe incluir referencias hardcodeadas a nombres o ubicaciones
+	de archivo. Esto debe permitirse ser provisto por par√°metro en la invocaci√≥n. En el
+	c√≥digo de ejemplo el grupo decidir√° d√≥nde se ubicar√≠an los archivos. Esto debe
+	aparecer en comentarios del m√≥dulo.
+	‚Ä¢ Adicionalmente se requiere que el sistema sea capaz de generar un archivo XML
 	detallando XXXXX. El mismo debe constar de los datos del XXXX.
-	ï Deber· presentar un archivo .sql con el script de creaciÛn de los objetos
+	‚Ä¢ Deber√° presentar un archivo .sql con el script de creaci√≥n de los objetos
 	correspondientes. En el mismo incluya un comentario donde conste este enunciado,
-	la fecha de entrega, n˙mero de grupo, nombre de la materia, nombres y DNI de los
-	alumnos. El mismo archivo SQL debe permitir la generaciÛn de los objetos
-	consignados en esta entrega (debe admitir una ejecuciÛn completa sin fallos).
-	ï Cada archivo SQL que contiene el cÛdigo de creaciÛn de objetos debe comenzar su
-	nombre con dos dÌgitos indicando el orden en que deben ejecutarse. Por ejemplo
-	ì00_CreacionSPImportacionCatalogoî. Estos archivos deben entregarse (como todos
-	los scripts) dentro de un proyecto/soluciÛn. Todos deben estar en el repositorio git del
+	la fecha de entrega, n√∫mero de grupo, nombre de la materia, nombres y DNI de los
+	alumnos. El mismo archivo SQL debe permitir la generaci√≥n de los objetos
+	consignados en esta entrega (debe admitir una ejecuci√≥n completa sin fallos).
+	‚Ä¢ Cada archivo SQL que contiene el c√≥digo de creaci√≥n de objetos debe comenzar su
+	nombre con dos d√≠gitos indicando el orden en que deben ejecutarse. Por ejemplo
+	‚Äú00_CreacionSPImportacionCatalogo‚Äù. Estos archivos deben entregarse (como todos
+	los scripts) dentro de un proyecto/soluci√≥n. Todos deben estar en el repositorio git del
 	grupo
-	ï TambiÈn debe presentar un archivo .sql que consista en las invocaciones a los SP
-	creados para generar la importaciÛn. Este archivo (que puede considerarse de testing)
-	debe contener comentarios para indicar el orden de ejecuciÛn.
-	ï Entregar todo en un zip cuyo nombre sea Grupo_XX.zip mediante la secciÛn de
-	pr·cticas de MIEL. Solo uno de los miembros del grupo debe hacer la entrega.
-	ï Se recomienda revisar periÛdicamente el foro en Miel de la materia. En el mismo se
-	informar· el agregado de informaciÛn, pautas o dudas respecto al TP
+	‚Ä¢ Tambi√©n debe presentar un archivo .sql que consista en las invocaciones a los SP
+	creados para generar la importaci√≥n. Este archivo (que puede considerarse de testing)
+	debe contener comentarios para indicar el orden de ejecuci√≥n.
+	‚Ä¢ Entregar todo en un zip cuyo nombre sea Grupo_XX.zip mediante la secci√≥n de
+	pr√°cticas de MIEL. Solo uno de los miembros del grupo debe hacer la entrega.
+	‚Ä¢ Se recomienda revisar peri√≥dicamente el foro en Miel de la materia. En el mismo se
+	informar√° el agregado de informaci√≥n, pautas o dudas respecto al TP
 */
 
 /*
@@ -42,11 +42,11 @@ Integrantes:
 /*
 	Entrega 3
 
-	Cree la base de datos, entidades y relaciones. Incluya restricciones y claves. Deber· entregar
-	un archivo .sql con el script completo de creaciÛn (debe funcionar si se lo ejecuta ìtal cualî es
-	entregado). Incluya comentarios para indicar quÈ hace cada mÛdulo de cÛdigo.
-	Genere esquemas para organizar de forma lÛgica los componentes del sistema y aplique esto
-	en la creaciÛn de objetos. NO use el esquema ìdboî.
+	Cree la base de datos, entidades y relaciones. Incluya restricciones y claves. Deber√° entregar
+	un archivo .sql con el script completo de creaci√≥n (debe funcionar si se lo ejecuta ‚Äútal cual‚Äù es
+	entregado). Incluya comentarios para indicar qu√© hace cada m√≥dulo de c√≥digo.
+	Genere esquemas para organizar de forma l√≥gica los componentes del sistema y aplique esto
+	en la creaci√≥n de objetos. NO use el esquema ‚Äúdbo‚Äù.
 */
 
 
@@ -103,7 +103,7 @@ CREATE TABLE productos.Producto
     cantidadPorUnidad VARCHAR(30),
 	idLineaProd INT NOT NULL,
     idProveedor INT,
-	estado CHAR(1) DEFAULT 'A' CHECK(estado IN ('A','I')), -- La columna estado se coloca para un borrado lÛgico, donde A es Activo e I es Inactivo.
+	estado CHAR(1) DEFAULT 'A' CHECK(estado IN ('A','I')), -- La columna estado se coloca para un borrado l√≥gico, donde A es Activo e I es Inactivo.
 	catalogo CHAR(3) NOT NULL, CHECK(catalogo IN('IMP','ELE','CSV')),
     CONSTRAINT PK_Productos PRIMARY KEY (id),
     CONSTRAINT FK_LineaProd_Prod FOREIGN KEY (idLineaProd) REFERENCES productos.LineaProducto(id),
@@ -189,6 +189,7 @@ GO
 CREATE TABLE ventas.MedioPago (
     id INT IDENTITY(1,1),
     nombre VARCHAR(50) UNIQUE NOT NULL,
+    reemplazaPor VARCHAR (50) NULL,
     CONSTRAINT PK_MedioPago PRIMARY KEY (id)
 );
 GO
