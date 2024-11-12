@@ -42,7 +42,7 @@ BEGIN
 	SET @sql = N'
 		INSERT INTO '+ @tabla +'
 			SELECT *
-			FROM OPENROWSET(''Microsoft.ACE.OLEDB.12.0'', ''Excel 12.0; Database=' + @ruta + ';HDR=YES'', ''SELECT * FROM [' + @hoja + '$]'')
+			FROM OPENROWSET(''Microsoft.ACE.OLEDB.12.0'', ''Excel 12.0; Database=' + @ruta + ';HDR=YES;IMEX=1'', ''SELECT * FROM [' + @hoja + '$]'')
 	';
 
 	EXEC sp_executesql @sql;
@@ -135,20 +135,68 @@ GO
 CREATE OR ALTER PROCEDURE importacion.ImportarEmpleados @ruta VARCHAR(256) AS
 BEGIN
 	DROP TABLE IF EXISTS #Empleado;
-	CREATE TABLE #Empleado(id CHAR(6), nombre VARCHAR(20), apellido VARCHAR(20), dni CHAR(8), emailPersonal VARCHAR(50), emailEmpresa VARCHAR(50), cuil CHAR(11), cargo VARCHAR(30), ciudad VARCHAR(50), turno CHAR(2));
+	CREATE TABLE #Empleado(id CHAR(6), nombre VARCHAR(200), apellido VARCHAR(200), dni DECIMAL(30,10), direccion VARCHAR(100), emailPersonal VARCHAR(200), emailEmpresa VARCHAR(200), cuil CHAR(11), cargo VARCHAR(30), ciudad VARCHAR(50), turno VARCHAR(20));
 
-	EXEC importacion.ImportarXlsx @ruta=@ruta, @hoja='Empleados', @tabla='#Emplado';
+	DECLARE @tabla VARCHAR(256);
+	DECLARE @hoja VARCHAR(31);
+	SET @tabla = '#Empleado';
+	SET @hoja = 'Empleados';
 
-	-- Creación de cargos
-	INSERT INTO negocio.Cargo
-	SELECT DISTINCT cargo
-	FROM #Empleado;
+	DECLARE @sql NVARCHAR(1024);
 
+	EXEC sp_configure 'show advanced options', 1;
+	RECONFIGURE WITH OVERRIDE;
+	EXEC sp_configure 'ad hoc distributed queries', 1;
+	RECONFIGURE WITH OVERRIDE;
+
+	SET @sql = N'
+		INSERT INTO '+ @tabla +'
+			SELECT 
+				CAST([Legajo/ID] AS VARCHAR(6)),
+				CAST(Nombre AS VARCHAR(200)),
+				CAST(Apellido AS VARCHAR(200)),
+				CAST(DNI AS DECIMAL(30,10)),
+				CAST(Direccion AS VARCHAR(100)),
+				CAST([email personal] AS VARCHAR(200)),
+				CAST([email empresa] AS VARCHAR(200)),
+				CAST(CUIL AS CHAR(11)),
+				CAST(Cargo AS VARCHAR(30)),
+				CAST(Sucursal AS VARCHAR(50)),
+				CAST(Turno AS VARCHAR(20))
+			FROM OPENROWSET(''Microsoft.ACE.OLEDB.12.0'', ''Excel 12.0; Database=' + @ruta + ';HDR=YES'', ''SELECT * FROM [' + @hoja + '$]'')
+	';
+
+	EXEC sp_executesql @sql;
+
+	EXEC sp_configure 'ad hoc distributed queries', 0;
+	RECONFIGURE WITH OVERRIDE;
+	EXEC sp_configure 'show advanced options', 0;
+	RECONFIGURE WITH OVERRIDE;
+	
 	INSERT INTO negocio.Empleado
-	SELECT CAST(id AS INT), nombre, apellido, CAST(dni AS INT), emailPersonal, emailEmpresa, CAST(cuil AS BIGINT), (SELECT id FROM negocio.Cargo WHERE nombre=cargo)
-	FROM #Empleado;
+	SELECT
+		REPLACE(nombre, CHAR(9), ' '),
+		REPLACE(apellido, CHAR(9), ' '),
+		CAST(dni AS INT), 
+		(SELECT id FROM negocio.Domicilio 
+			WHERE calle = LEFT(TRIM(LEFT(direccion, PATINDEX('%,%', direccion) - 1)), LEN(TRIM(LEFT(direccion, PATINDEX('%,%', direccion) - 1))) - PATINDEX('% %', REVERSE(TRIM(LEFT(direccion, PATINDEX('%,%', direccion) - 1)))))
+			AND numero = LEFT(RIGHT(TRIM(LEFT(direccion, PATINDEX('%,%', direccion))), PATINDEX('% %', REVERSE(direccion))), LEN(RIGHT(TRIM(LEFT(direccion, PATINDEX('%,%', direccion))), PATINDEX('% %', REVERSE(direccion)))) - 2)
+		),
+		LOWER(REPLACE(emailPersonal, CHAR(9), '')),
+		LOWER(REPLACE(emailEmpresa, CHAR(9) , '')),
+		CAST(cuil AS BIGINT),
+		(SELECT id FROM negocio.Cargo WHERE nombre=cargo),
+		(SELECT id FROM negocio.Sucursal WHERE idDomicilio = (SELECT TOP 1 id FROM negocio.Domicilio WHERE idCiudad = (SELECT id FROM negocio.Ciudad WHERE nombre COLLATE Modern_Spanish_CI_AI = ciudad))),
+		turno
+	FROM #Empleado AS e;
 END
 GO
+
+/*
+EXEC importacion.ImportarEmpleados @ruta='C:\TP\TP_integrador_Archivos\Informacion_complementaria.xlsx'
+SELECT * FROM negocio.Sucursal
+SELECT * FROM negocio.Domicilio WHERE id = 46 OR id = 47 OR id = 48
+SELECT * FROM negocio.Ciudad*/
 
 CREATE OR ALTER PROCEDURE importacion.ImportarInformacionComplementaria @ruta VARCHAR(256) AS
 BEGIN
@@ -174,11 +222,10 @@ BEGIN
 		('Avellaneda', @idBuenosAires, NULL),
 		('La Plata', @idBuenosAires, NULL),
 		('Malvinas Argentinas', @idBuenosAires, NULL),
-		('San Justo', @idBuenosAires, NULL),
 		('San Martín', @idBuenosAires, NULL),
 		('Carapachay', @idBuenosAires, NULL),
 		('Chilavert', @idBuenosAires, NULL);
-
+		
 	-- Domicilios
 	INSERT INTO negocio.Domicilio (calle, numero, idCiudad, codigoPostal) VALUES
 		('Av. Brig. Gral. Juan Manuel de Rosas', 3634, (SELECT id FROM negocio.Ciudad WHERE nombre = 'San Justo'), 'B1754'),
@@ -194,12 +241,26 @@ BEGIN
 		('Av. Santa Fe', 1954, (SELECT id FROM negocio.Ciudad WHERE nombre = 'Ciudad Autónoma de Buenos Aires'), NULL),
 		('Av. San Martín', 420, (SELECT id FROM negocio.Ciudad WHERE nombre = 'San Martín'), NULL),
 		('Independencia', 3067, (SELECT id FROM negocio.Ciudad WHERE nombre = 'Carapachay'), NULL),
-		('Bernardo de Irigoyen', 2647, (SELECT id FROM negocio.Ciudad WHERE nombre = 'San Isidro'), NULL),
 		('Av. Rivadavia', 2243, (SELECT id FROM negocio.Ciudad WHERE nombre = 'Ciudad Autónoma de Buenos Aires'), NULL),
 		('Juramento', 2971, (SELECT id FROM negocio.Ciudad WHERE nombre = 'Ciudad Autónoma de Buenos Aires'), NULL),
 		('Hipólito Yrigoyen', 299, NULL, NULL),
 		('Lacroze', 5910, (SELECT id FROM negocio.Ciudad WHERE nombre = 'Chilavert'), NULL);
+
+	-- Cargos
+	INSERT INTO negocio.Cargo (nombre) VALUES
+		('Cajero'),
+		('Supervisor'),
+		('Gerente de sucursal');
+
+	-- Sucursales
+	INSERT INTO negocio.Sucursal (idDomicilio, horario, telefono) VALUES
+		((SELECT id FROM negocio.Domicilio WHERE calle = 'Av. Brig. Gral. Juan Manuel de Rosas' AND numero = 3634), 'L a V 8 a. m.–9 p. m.', '5555-5551'),
+		((SELECT id FROM negocio.Domicilio WHERE calle = 'Av. de Mayo' AND numero = 791), 'L a V 8 a. m.–9 p. m.', '5555-5552'),
+		((SELECT id FROM negocio.Domicilio WHERE calle = 'Pres. Juan Domingo Perón' AND numero = 763), 'L a V 8 a. m.–9 p. m.', '5555-5553');
+
+	EXEC importacion.ImportarEmpleados @ruta=@ruta		
 END
+GO
 
 -- Creación de Store Procedures para importar catálogos
 
@@ -395,7 +456,7 @@ SET @rutaCatalogoCsv = 'C:\TP\TP_integrador_Archivos\Productos\catalogo.csv'
 SET @rutaCatalogoElectronica = 'C:\TP\TP_integrador_Archivos\Productos\Electronic accessories.xlsx'
 SET @rutaCatalogoImportados = 'C:\TP\TP_integrador_Archivos\Productos\Productos_importados.xlsx'
 
-EXEC importacion.ImportarInformacionComplementaria @ruta=@rutaInfoComplementaria
+--EXEC importacion.ImportarInformacionComplementaria @ruta=@rutaInfoComplementaria
 EXEC importacion.ImportarCatalogoCsv @ruta=@rutaCatalogoCsv
 EXEC importacion.ImportarAccesoriosElectronicos @ruta=@rutaCatalogoElectronica
 EXEC importacion.ImportarProductosImportados @ruta=@rutaCatalogoImportados
