@@ -164,13 +164,13 @@ GO
 
 --Medio Pago
 -- Sin errores
-EXEC ventas.InsertarMedioPago @nombre = 'Efectivo';
-EXEC ventas.InsertarMedioPago @nombre = 'Tarjeta de Credito';
-EXEC ventas.InsertarMedioPago @nombre = 'Transferencia Bancaria';
-EXEC ventas.InsertarMedioPago @nombre = 'Criptomonedas';
+EXEC ventas.InsertarMedioPago @nombre = 'Efectivo', @reemplazaPor = NULL;
+EXEC ventas.InsertarMedioPago @nombre = 'Tarjeta de Credito', @reemplazaPor = NULL;
+EXEC ventas.InsertarMedioPago @nombre = 'Transferencia Bancaria', @reemplazaPor = NULL;
+EXEC ventas.InsertarMedioPago @nombre = 'Criptomonedas', @reemplazaPor = NULL;
 
 -- Error (nombre duplicado)
-EXEC ventas.InsertarMedioPago @nombre = 'Efectivo';
+EXEC ventas.InsertarMedioPago @nombre = 'Efectivo', @reemplazaPor = NULL;
 
 -- Verifico
 SELECT * FROM ventas.MedioPago;
