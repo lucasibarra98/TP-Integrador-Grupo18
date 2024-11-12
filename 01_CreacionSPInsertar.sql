@@ -242,14 +242,15 @@ GO
 
 -- Inserta medio de pago
 CREATE OR ALTER PROCEDURE ventas.InsertarMedioPago
-    @nombre VARCHAR(50)
+    @nombre VARCHAR(50),
+    @reemplazaPor VARCHAR(50)
 AS
 BEGIN
 	-- Verifico nombre
     IF NOT EXISTS (SELECT 1 FROM ventas.MedioPago WHERE nombre = @nombre)
     BEGIN
-        INSERT INTO ventas.MedioPago (nombre)
-        VALUES (@nombre);
+        INSERT INTO ventas.MedioPago (nombre,reemplazaPor)
+        VALUES (@nombre,@reemplazaPor);
     END
     ELSE
     BEGIN
