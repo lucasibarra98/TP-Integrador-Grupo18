@@ -156,3 +156,4 @@ EXEC ventas.ModificarDetalleNotaCredito @id = 1, @idNotaCredito = 1, @idDetalleF
 EXEC ventas.ModificarDetalleNotaCredito @id = 99, @idNotaCredito = 1, @idDetalleFactura = 1, @cantidad = 2; -- id inexistente
 SELECT * FROM ventas.DetalleNotaCredito;
 GO
+
