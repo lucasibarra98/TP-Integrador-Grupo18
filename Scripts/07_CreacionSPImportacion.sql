@@ -105,7 +105,7 @@ GO
 CREATE OR ALTER PROCEDURE importacion.ImportarEmpleados @ruta VARCHAR(256) AS
 BEGIN
 	DROP TABLE IF EXISTS #Empleado;
-	CREATE TABLE #Empleado(id CHAR(6), nombre VARCHAR(200), apellido VARCHAR(200), dni DECIMAL(30,10), direccion VARCHAR(100), emailPersonal VARCHAR(200), emailEmpresa VARCHAR(200), cuil CHAR(11), cargo VARCHAR(30), ciudad VARCHAR(50), turno VARCHAR(20));
+	CREATE TABLE #Empleado(id CHAR(6), nombre VARCHAR(200), apellido VARCHAR(200), dni DECIMAL(30,10), direccion VARCHAR(100), emailPersonal VARCHAR(200), emailEmpresa VARCHAR(200), cuil CHAR(11), cargo VARCHAR(30), sucursal VARCHAR(50), turno VARCHAR(20));
 
 	DECLARE @tabla VARCHAR(256);
 	DECLARE @hoja VARCHAR(31);
@@ -154,15 +154,12 @@ BEGIN
 		LOWER(REPLACE(nombre, CHAR(9), ' ')),
 		LOWER(REPLACE(apellido, CHAR(9), ' ')),
 		CAST(dni AS INT), 
-		(SELECT id FROM negocio.Domicilio 
-			WHERE calle = LEFT(TRIM(LEFT(direccion, PATINDEX('%,%', direccion) - 1)), LEN(TRIM(LEFT(direccion, PATINDEX('%,%', direccion) - 1))) - PATINDEX('% %', REVERSE(TRIM(LEFT(direccion, PATINDEX('%,%', direccion) - 1)))))
-			AND numero = LEFT(RIGHT(TRIM(LEFT(direccion, PATINDEX('%,%', direccion))), PATINDEX('% %', REVERSE(direccion))), LEN(RIGHT(TRIM(LEFT(direccion, PATINDEX('%,%', direccion))), PATINDEX('% %', REVERSE(direccion)))) - 2)
-		),
+		direccion,
 		LOWER(REPLACE(emailPersonal, CHAR(9), '')),
 		LOWER(REPLACE(emailEmpresa, CHAR(9) , '')),
 		CAST(cuil AS BIGINT),
 		(SELECT id FROM negocio.Cargo WHERE nombre=cargo),
-		(SELECT id FROM negocio.Sucursal WHERE idDomicilio = (SELECT TOP 1 id FROM negocio.Domicilio WHERE idCiudad = (SELECT id FROM negocio.Ciudad WHERE nombre COLLATE Modern_Spanish_CI_AI = ciudad))),
+		(SELECT id FROM negocio.Sucursal WHERE nombre = sucursal),
 		turno
 	FROM #Empleado AS e
 	WHERE nombre IS NOT NULL;
@@ -219,18 +216,8 @@ BEGIN
 
 	EXEC importacion.ImportarXlsx @tabla=@tabla, @hoja=@hoja, @ruta=@ruta
 
-	-- Cargar ciudades para reemplazarPor
-	UPDATE negocio.Ciudad
-	SET reemplazaPor = S.ciudad FROM negocio.Ciudad C INNER JOIN #Sucursal S ON S.reemplazarPor COLLATE Modern_Spanish_CI_AI = C.nombre
-
-	-- Sucursales
-	INSERT INTO negocio.Sucursal (idDomicilio, horario, telefono)
-	SELECT (SELECT id
-		FROM negocio.Domicilio 
-		WHERE calle = REPLACE(LEFT(direccion, PATINDEX('%[1-9]%', direccion) - 1), CHAR(160), '')
-		AND numero = SUBSTRING(direccion, PATINDEX('%[1-9]%', direccion), PATINDEX('%,%', direccion) - PATINDEX('%[1-9]%', direccion))),
-		horario,
-		telefono
+	INSERT INTO negocio.Sucursal (nombre, direccion, horario, telefono, ciudad)
+	SELECT reemplazarPor, direccion, horario, telefono, ciudad
 	FROM #Sucursal WHERE direccion IS NOT NULL
 END
 GO
@@ -238,59 +225,9 @@ GO
 -- SP para cargar toda la información del archivo de información complementaria
 CREATE OR ALTER PROCEDURE importacion.ImportarInformacionComplementaria @ruta VARCHAR(256) AS
 BEGIN
-	-- Importación de Líneas de producto
 	EXEC importacion.CargarLineasDeProducto @ruta=@ruta
-
-	-- Medios de pago
 	EXEC importacion.ImportarMediosDePago @ruta=@ruta
-
-	-- Provincias
-	INSERT INTO negocio.Provincia VALUES ('Buenos Aires'), ('Ciudad Autónoma de Buenos Aires');
-
-	DECLARE @idBuenosAires INT;
-	DECLARE @idCABA INT;
-	SET @idBuenosAires = (SELECT id FROM negocio.Provincia WHERE nombre = 'Buenos Aires'); 
-	SET @idCABA = (SELECT id FROM negocio.Provincia WHERE nombre = 'Ciudad Autónoma de Buenos Aires');
-	
-	-- Ciudades
-	INSERT INTO negocio.Ciudad (nombre, idProvincia) VALUES
-		('Ciudad Autónoma de Buenos Aires', @idCABA),
-		('San Justo', @idBuenosAires),
-		('Ramos Mejía', @idBuenosAires),
-		('Lomas del Mirador', @idBuenosAires),
-		('San Isidro', @idBuenosAires),
-		('Hurlingham', @idBuenosAires),
-		('Avellaneda', @idBuenosAires),
-		('La Plata', @idBuenosAires),
-		('Malvinas Argentinas', @idBuenosAires),
-		('San Martín', @idBuenosAires),
-		('Carapachay', @idBuenosAires),
-		('Chilavert', @idBuenosAires);
-		
-	-- Domicilios
-	INSERT INTO negocio.Domicilio (calle, numero, idCiudad, codigoPostal) VALUES
-		('Av. Brig. Gral. Juan Manuel de Rosas', 3634, (SELECT id FROM negocio.Ciudad WHERE nombre = 'San Justo'), 'B1754'),
-		('Av. de Mayo', 791, (SELECT id FROM negocio.Ciudad WHERE nombre = 'Ramos Mejía'), 'B1704'),
-		('Pres. Juan Domingo Perón', 763, (SELECT id FROM negocio.Ciudad WHERE nombre = 'Lomas del Mirador'), 'B1704'),
-		('Bernardo de Irigoyen', 2647, (SELECT id FROM negocio.Ciudad WHERE nombre = 'San Isidro'), NULL),
-		('Av. Vergara', 1910, (SELECT id FROM negocio.Ciudad WHERE nombre = 'Hurlingham'), NULL),
-		('Av. Belgrano', 422, (SELECT id FROM negocio.Ciudad WHERE nombre = 'Avellaneda'), NULL),
-		('Calle 7 ', 767, (SELECT id FROM negocio.Ciudad WHERE nombre = 'La Plata'), NULL),
-		('Av. Arturo Illia', 3770, (SELECT id FROM negocio.Ciudad WHERE nombre = 'Malvinas Argentinas'), NULL),
-		('Av. Rivadavia', 6538, (SELECT id FROM negocio.Ciudad WHERE nombre = 'Ciudad Autónoma de Buenos Aires'), NULL),
-		('Av. Don Bosco', 2680, (SELECT id FROM negocio.Ciudad WHERE nombre = 'San Justo'), NULL),
-		('Av. Santa Fe', 1954, (SELECT id FROM negocio.Ciudad WHERE nombre = 'Ciudad Autónoma de Buenos Aires'), NULL),
-		('Av. San Martín', 420, (SELECT id FROM negocio.Ciudad WHERE nombre = 'San Martín'), NULL),
-		('Independencia', 3067, (SELECT id FROM negocio.Ciudad WHERE nombre = 'Carapachay'), NULL),
-		('Av. Rivadavia', 2243, (SELECT id FROM negocio.Ciudad WHERE nombre = 'Ciudad Autónoma de Buenos Aires'), NULL),
-		('Juramento', 2971, (SELECT id FROM negocio.Ciudad WHERE nombre = 'Ciudad Autónoma de Buenos Aires'), NULL),
-		('Av. Presidente Hipólito Yrigoyen', 299, NULL, NULL),
-		('Lacroze', 5910, (SELECT id FROM negocio.Ciudad WHERE nombre = 'Chilavert'), NULL);
-
-	-- Importación de sucursal
 	EXEC importacion.ImportarSucursal @ruta=@ruta
-
-	-- Importación de empleados
 	EXEC importacion.ImportarEmpleados @ruta=@ruta		
 END
 GO

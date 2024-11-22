@@ -107,6 +107,7 @@ CREATE TABLE productos.Producto
 	precioUnitario DECIMAL(10,2) NOT NULL,
     cantidadPorUnidad VARCHAR(30),
 	estado CHAR(1) DEFAULT 'A' CHECK(estado IN ('A','I')), -- La columna estado se coloca para un borrado lógico, donde A es Activo e I es Inactivo.
+	catalogo CHAR(3) CHECK(catalogo = 'ELE' OR catalogo = 'IMP' OR catalogo = 'CSV')
     CONSTRAINT PK_Productos PRIMARY KEY (id),
     CONSTRAINT FK_LineaProd_Prod FOREIGN KEY (idLineaProd) REFERENCES productos.LineaProducto(id),
     CONSTRAINT FK_Proveedor_Prod FOREIGN KEY (idProveedor) REFERENCES productos.Proveedor(id),
