@@ -1,9 +1,10 @@
 USE Com2900G18
 GO
 
---SCHEMA PRODUCTOS
+------SCHEMA PRODUCTOS------
 
---Modifico Linea Producto
+--Linea Producto
+
 CREATE OR ALTER PROCEDURE productos.ModificarLineaProducto
     @id INT,
     @nombre VARCHAR(40)
@@ -17,33 +18,40 @@ BEGIN
     END
     ELSE
     BEGIN
-        PRINT 'Error: El id de la línea de producto no existe.';
+        PRINT 'Error: La linea de producto no existe.';
     END
 END;
 GO
 
---Modifico Categoria
+--Categoria
+
 CREATE OR ALTER PROCEDURE productos.ModificarCategoria
     @id INT,
     @nombre VARCHAR(50),
     @idLineaProd INT
 AS
 BEGIN
-    IF EXISTS (SELECT 1 FROM productos.Categoria WHERE id = @id) AND
-       EXISTS (SELECT 1 FROM productos.LineaProducto WHERE id = @idLineaProd)
+    IF NOT EXISTS (SELECT 1 FROM productos.Categoria WHERE id = @id)
     BEGIN
-        UPDATE productos.Categoria
-        SET nombre = @nombre, idLineaProd = @idLineaProd
-        WHERE id = @id;
+        PRINT 'Error: La categoria no existe.';
+        RETURN;
     END
-    ELSE
+
+    IF NOT EXISTS (SELECT 1 FROM productos.LineaProducto WHERE id = @idLineaProd)
     BEGIN
-        PRINT 'Error: El id de la categoría o de la linea de producto no existe.';
+        PRINT 'Error: La linea de producto no existe.';
+        RETURN;
     END
+
+    UPDATE productos.Categoria
+    SET nombre = @nombre,
+        idLineaProd = @idLineaProd
+    WHERE id = @id;
 END;
 GO
 
---Modifico Proveedor
+--Proveedor
+
 CREATE OR ALTER PROCEDURE productos.ModificarProveedor
     @id INT,
     @nombre VARCHAR(50)
@@ -57,190 +65,111 @@ BEGIN
     END
     ELSE
     BEGIN
-        PRINT 'Error: El id del proveedor no existe.';
+        PRINT 'Error: El proveedor no existe.';
     END
 END;
 GO
 
---Modifico Producto
+--Producto
+
 CREATE OR ALTER PROCEDURE productos.ModificarProducto
     @id INT,
     @nombre VARCHAR(100),
-    @precioUnitario DECIMAL(10,2),
-    @cantidadPorUnidad VARCHAR(30),
     @idLineaProd INT,
     @idProveedor INT,
-    @catalogo CHAR(3)
+    @precioUnitario DECIMAL(10,2),
+    @cantidadPorUnidad VARCHAR(30),
+    @estado CHAR(1)
 AS
 BEGIN
-	--Verifico idProdcut
+--Validamos existencia de producto
     IF NOT EXISTS (SELECT 1 FROM productos.Producto WHERE id = @id)
     BEGIN
-        PRINT 'Error: El id del producto no existe.';
+        PRINT 'Error: El producto no existe.';
         RETURN;
     END
-
-	--Verifico idLineaProducto
+--Validamos existencia de linea de producto
     IF NOT EXISTS (SELECT 1 FROM productos.LineaProducto WHERE id = @idLineaProd)
     BEGIN
-        PRINT 'Error: El id de la línea de producto no existe.';
+        PRINT 'Error: La linea de producto no existe.';
         RETURN;
     END
 
-	--Verifico idProveedor
     IF NOT EXISTS (SELECT 1 FROM productos.Proveedor WHERE id = @idProveedor)
     BEGIN
-        PRINT 'Error: El id del proveedor no existe.';
+        PRINT 'Error:El proveedor no existe.';
         RETURN;
     END
 
     UPDATE productos.Producto
     SET nombre = @nombre,
-        precioUnitario = @precioUnitario,
-        cantidadPorUnidad = @cantidadPorUnidad,
         idLineaProd = @idLineaProd,
         idProveedor = @idProveedor,
-        catalogo = @catalogo
+        precioUnitario = @precioUnitario,
+        cantidadPorUnidad = @cantidadPorUnidad,
+        estado = @estado
     WHERE id = @id;
 END;
 GO
 
---SCHEMA NEGOCIO
+------SCHEMA NEGOCIO------
 
---Modifico Provincia
-CREATE OR ALTER PROCEDURE negocio.ModificarProvincia
-    @id INT,
-    @nombre VARCHAR(50)
-AS
-BEGIN
-	--Verifico idProvincia
-    IF NOT EXISTS (SELECT 1 FROM negocio.Provincia WHERE id = @id)
-    BEGIN
-        PRINT 'Error: El id de la provincia no existe.';
-        RETURN;
-    END
+--Sucursal
 
-    UPDATE negocio.Provincia
-    SET nombre = @nombre
-    WHERE id = @id;
-END;
-GO
-
---Modifico Ciudad
-CREATE OR ALTER PROCEDURE negocio.ModificarCiudad
-    @id INT,
-    @nombre VARCHAR(50),
-    @reemplazaPor VARCHAR(50),
-    @idProvincia INT
-AS
-BEGIN
-	--Verifico idCiudad
-    IF NOT EXISTS (SELECT 1 FROM negocio.Ciudad WHERE id = @id)
-    BEGIN
-        PRINT 'Error: El id de la ciudad no existe.';
-        RETURN;
-    END
-	--Verifico idProvincia
-    IF NOT EXISTS (SELECT 1 FROM negocio.Provincia WHERE id = @idProvincia)
-    BEGIN
-        PRINT 'Error: El id de la provincia no existe.';
-        RETURN;
-    END
-
-    UPDATE negocio.Ciudad
-    SET nombre = @nombre,
-        reemplazaPor = @reemplazaPor,
-        idProvincia = @idProvincia
-    WHERE id = @id;
-END;
-GO
-
---Modifico Domicilio
-CREATE OR ALTER PROCEDURE negocio.ModificarDomicilio
-    @id INT,
-    @calle VARCHAR(50),
-    @numero INT,
-    @idCiudad INT,
-    @codigoPostal VARCHAR(8)
-AS
-BEGIN
-	--Verifico idDomicilio
-    IF NOT EXISTS (SELECT 1 FROM negocio.Domicilio WHERE id = @id)
-    BEGIN
-        PRINT 'Error: El id del domicilio no existe.';
-        RETURN;
-    END
-	--Verifico idCiudad
-    IF NOT EXISTS (SELECT 1 FROM negocio.Ciudad WHERE id = @idCiudad)
-    BEGIN
-        PRINT 'Error: El id de la ciudad no existe.';
-        RETURN;
-    END
-
-    UPDATE negocio.Domicilio
-    SET calle = @calle,
-        numero = @numero,
-        idCiudad = @idCiudad,
-        codigoPostal = @codigoPostal
-    WHERE id = @id;
-END;
-GO
-
---Modifico Sucursal 
 CREATE OR ALTER PROCEDURE negocio.ModificarSucursal
     @id INT,
-    @idDomicilio INT,
+    @nombre VARCHAR(50),
+    @direccion VARCHAR(100),
     @horario VARCHAR(100),
-    @telefono CHAR(9)
+    @telefono CHAR(9),
+    @ciudad VARCHAR(50)
 AS
 BEGIN
-	--Verifico idSucursal
-    IF NOT EXISTS (SELECT 1 FROM negocio.Sucursal WHERE id = @id)
+    IF EXISTS (SELECT 1 FROM negocio.Sucursal WHERE id = @id)
     BEGIN
-        PRINT 'Error: El id de la sucursal no existe.';
-        RETURN;
+        UPDATE negocio.Sucursal
+        SET nombre = @nombre,
+            direccion = @direccion,
+            horario = @horario,
+            telefono = @telefono,
+            ciudad = @ciudad
+        WHERE id = @id;
     END
-	--Verifico idDomicilio
-    IF NOT EXISTS (SELECT 1 FROM negocio.Domicilio WHERE id = @idDomicilio)
+    ELSE
     BEGIN
-        PRINT 'Error: El id del domicilio no existe.';
-        RETURN;
+        PRINT 'Error: La sucursal no existe.';
     END
-
-    UPDATE negocio.Sucursal
-    SET idDomicilio = @idDomicilio,
-        horario = @horario,
-        telefono = @telefono
-    WHERE id = @id;
 END;
 GO
 
---Modifico Cargo 
+--Cargo
+
 CREATE OR ALTER PROCEDURE negocio.ModificarCargo
     @id INT,
     @nombre VARCHAR(30)
 AS
 BEGIN
-	--Verifico idCargo
-    IF NOT EXISTS (SELECT 1 FROM negocio.Cargo WHERE id = @id)
+    IF EXISTS (SELECT 1 FROM negocio.Cargo WHERE id = @id)
     BEGIN
-        PRINT 'Error: El id del cargo no existe.';
-        RETURN;
+        UPDATE negocio.Cargo
+        SET nombre = @nombre
+        WHERE id = @id;
     END
-
-    UPDATE negocio.Cargo
-    SET nombre = @nombre
-    WHERE id = @id;
+    ELSE
+    BEGIN
+        PRINT 'Error: El cargo no existe.';
+    END
 END;
 GO
 
---Modifico Empleado
+--Empleado
+
 CREATE OR ALTER PROCEDURE negocio.ModificarEmpleado
     @id INT,
     @nombre VARCHAR(100),
     @apellido VARCHAR(100),
     @dni INT,
-    @idDomicilio INT,
+    @domicilio VARCHAR(100),
     @emailPersonal VARCHAR(100),
     @emailEmpresa VARCHAR(100),
     @cuil BIGINT,
@@ -249,28 +178,22 @@ CREATE OR ALTER PROCEDURE negocio.ModificarEmpleado
     @turno VARCHAR(20)
 AS
 BEGIN
-	--Verifico idEmpleado
+--Validamos la existencia del empleado
     IF NOT EXISTS (SELECT 1 FROM negocio.Empleado WHERE id = @id)
     BEGIN
-        PRINT 'Error: El ID del empleado no existe.';
+        PRINT 'Error: El empleado no existe.';
         RETURN;
     END
-	--Verifico idDomicilio
-    IF NOT EXISTS (SELECT 1 FROM negocio.Domicilio WHERE id = @idDomicilio)
-    BEGIN
-        PRINT 'Error: El id del domicilio no existe.';
-        RETURN;
-    END
-	--Verifico idCargo
+--Validamos la existencia del cargo
     IF NOT EXISTS (SELECT 1 FROM negocio.Cargo WHERE id = @idCargo)
     BEGIN
-        PRINT 'Error: El id del cargo no existe.';
+        PRINT 'Error: El cargo no existe.';
         RETURN;
     END
-	--Verifico idSucursal
+--Validamos la existencia de la sucursal
     IF NOT EXISTS (SELECT 1 FROM negocio.Sucursal WHERE id = @idSucursal)
     BEGIN
-        PRINT 'Error: El id de la sucursal no existe.';
+        PRINT 'Error: La sucursal no existe.';
         RETURN;
     END
 
@@ -278,7 +201,7 @@ BEGIN
     SET nombre = @nombre,
         apellido = @apellido,
         dni = @dni,
-        idDomicilio = @idDomicilio,
+        domicilio = @domicilio,
         emailPersonal = @emailPersonal,
         emailEmpresa = @emailEmpresa,
         cuil = @cuil,
@@ -289,30 +212,32 @@ BEGIN
 END;
 GO
 
---SCHEMA VENTAS
+------SCHEMA VENTAS------
 
---Modifico Medio Pago
+--Medio Pago
+
 CREATE OR ALTER PROCEDURE ventas.ModificarMedioPago
     @id INT,
     @nombre VARCHAR(50),
     @reemplazaPor VARCHAR(50)
 AS
 BEGIN
-	--Verifico Medio Pago
+--Validamos que el medio de pago exista
     IF NOT EXISTS (SELECT 1 FROM ventas.MedioPago WHERE id = @id)
     BEGIN
-        PRINT 'Error: El id del medio de pago no existe.';
+        PRINT 'Error: El medio de pago no existe.';
         RETURN;
     END
 
     UPDATE ventas.MedioPago
     SET nombre = @nombre,
-	reemplazaPor = @reemplazaPor
+        reemplazaPor = @reemplazaPor
     WHERE id = @id;
 END;
 GO
 
---Modifico Pago
+--Pago
+
 CREATE OR ALTER PROCEDURE ventas.ModificarPago
     @id INT,
     @cod VARCHAR(50),
@@ -320,16 +245,17 @@ CREATE OR ALTER PROCEDURE ventas.ModificarPago
     @idMedioPago INT
 AS
 BEGIN
-	--Verifico idPago
+--Validamos que el pago exista
     IF NOT EXISTS (SELECT 1 FROM ventas.Pago WHERE id = @id)
     BEGIN
-        PRINT 'Error: El id del pago no existe.';
+        PRINT 'Error: El ID del pago no existe.';
         RETURN;
     END
-	--Verifico idMedioPago
+
+--Validamos que el medio de pago exista
     IF NOT EXISTS (SELECT 1 FROM ventas.MedioPago WHERE id = @idMedioPago)
     BEGIN
-        PRINT 'Error: El id del medio de pago no existe.';
+        PRINT 'Error: El medio de pago no existe.';
         RETURN;
     END
 
@@ -341,16 +267,17 @@ BEGIN
 END;
 GO
 
---Modifico Tipo Factura
+--Tipo Factura
+
 CREATE OR ALTER PROCEDURE ventas.ModificarTipoFactura
     @id INT,
     @sigla CHAR(1)
 AS
 BEGIN
-	--Verifico idTipoFactura
+--Validamos que el tipo de factura exista
     IF NOT EXISTS (SELECT 1 FROM ventas.TipoFactura WHERE id = @id)
     BEGIN
-        PRINT 'Error: El id del tipo de factura no existe.';
+        PRINT 'Error: El tipo de factura no existe.';
         RETURN;
     END
 
@@ -360,133 +287,191 @@ BEGIN
 END;
 GO
 
---Modifico Tipo Cliente
-CREATE OR ALTER PROCEDURE ventas.ModificarTipoCliente
+--Cliente
+
+CREATE OR ALTER PROCEDURE ventas.ModificarCliente
     @id INT,
-    @nombre VARCHAR(50)
+    @nombre VARCHAR(50),
+    @apellido VARCHAR(50),
+    @dni INT,
+    @genero VARCHAR(20),
+    @tipoCliente VARCHAR(20)
 AS
 BEGIN
-	--Verifico idTipoCliente
-    IF NOT EXISTS (SELECT 1 FROM ventas.TipoCliente WHERE id = @id)
+--Validamos que el cliente exista
+    IF NOT EXISTS (SELECT 1 FROM ventas.Cliente WHERE id = @id)
     BEGIN
-        PRINT 'Error: El id del tipo de cliente no existe.';
+        PRINT 'Error: El cliente no existe.';
         RETURN;
     END
 
-    UPDATE ventas.TipoCliente
-    SET nombre = @nombre
+    UPDATE ventas.Cliente
+    SET nombre = @nombre,
+        apellido = @apellido,
+        dni = @dni,
+        genero = @genero,
+        tipoCliente = @tipoCliente
     WHERE id = @id;
 END;
 GO
 
---Modifico Factura
-CREATE OR ALTER PROCEDURE ventas.ModificarFactura
+--Venta
+
+CREATE OR ALTER PROCEDURE ventas.ModificarVenta
     @id INT,
-    @idTipoFactura INT,
-    @idTipoCliente INT,
-    @genero VARCHAR(10),
+    @idCliente INT,
+    @idEmpleado INT,
+    @idSucursal INT,
     @fecha DATE,
     @hora TIME,
-    @total DECIMAL(10,2),
-    @idPago INT,
-    @idEmpleado INT,
-    @idSucursal INT
+    @totalSinIVA DECIMAL(10,2)
 AS
 BEGIN
-	--Verifico idFactura
-    IF NOT EXISTS (SELECT 1 FROM ventas.Factura WHERE id = @id)
+--Validamos que la venta exista
+    IF NOT EXISTS (SELECT 1 FROM ventas.Venta WHERE id = @id)
     BEGIN
-        PRINT 'Error: El id de la factura no existe.';
+        PRINT 'Error: La venta no existe.';
         RETURN;
     END
-	--Verifico idTipoFactura
-    IF NOT EXISTS (SELECT 1 FROM ventas.TipoFactura WHERE id = @idTipoFactura)
+--Validamos que el cliente exista
+    IF NOT EXISTS (SELECT 1 FROM ventas.Cliente WHERE id = @idCliente)
     BEGIN
-        PRINT 'Error: El id del tipo de factura no existe.';
+        PRINT 'Error: El cliente no existe.';
         RETURN;
     END
-	--Verifico idTipoCliente
-    IF NOT EXISTS (SELECT 1 FROM ventas.TipoCliente WHERE id = @idTipoCliente)
-    BEGIN
-        PRINT 'Error: El id del tipo de cliente no existe.';
-        RETURN;
-    END
-	--Verifico idPago
-    IF NOT EXISTS (SELECT 1 FROM ventas.Pago WHERE id = @idPago)
-    BEGIN
-        PRINT 'Error: El id del pago no existe.';
-        RETURN;
-    END
-	--Verifico idEmpleado
+--Validamos que el empleado exista
     IF NOT EXISTS (SELECT 1 FROM negocio.Empleado WHERE id = @idEmpleado)
     BEGIN
-        PRINT 'Error: El id del empleado no existe.';
+        PRINT 'Error: El empleado no existe.';
         RETURN;
     END
-	--Verifico idSucursal
+--Validamos que la sucursal exista
     IF NOT EXISTS (SELECT 1 FROM negocio.Sucursal WHERE id = @idSucursal)
     BEGIN
-        PRINT 'Error: El id de la sucursal no existe.';
+        PRINT 'Error: La sucursal no existe.';
         RETURN;
     END
 
-    UPDATE ventas.Factura
-    SET idTipoFactura = @idTipoFactura,
-        idTipoCliente = @idTipoCliente,
-        genero = @genero,
+    UPDATE ventas.Venta
+    SET idCliente = @idCliente,
+        idEmpleado = @idEmpleado,
+        idSucursal = @idSucursal,
         fecha = @fecha,
         hora = @hora,
-        total = @total,
-        idPago = @idPago,
-        idEmpleado = @idEmpleado,
-        idSucursal = @idSucursal
+        totalSinIVA = @totalSinIVA
     WHERE id = @id;
 END;
 GO
 
---Modifico Detalle Factura
-CREATE OR ALTER PROCEDURE ventas.ModificarDetalleFactura
+--Detalle Venta
+
+CREATE OR ALTER PROCEDURE ventas.ModificarDetalleVenta
     @id INT,
-    @idFactura INT,
+    @idVenta INT,
     @idProducto INT,
-    @cantidad INT,
-    @precioUnitario DECIMAL(10,2)
+    @cantidad INT
 AS
 BEGIN
-	--Verifico idDetalleFactura
-    IF NOT EXISTS (SELECT 1 FROM ventas.DetalleFactura WHERE id = @id)
+--Validamos que el detalle de venta exista
+    IF NOT EXISTS (SELECT 1 FROM ventas.DetalleVenta WHERE id = @id)
     BEGIN
-        PRINT 'Error: El id del detalle de factura no existe.';
-        RETURN;
-    END
-	--Verifico idFactura
-    IF NOT EXISTS (SELECT 1 FROM ventas.Factura WHERE id = @idFactura)
-    BEGIN
-        PRINT 'Error: El id de la factura no existe.';
-        RETURN;
-    END
-	--Verifico idProducto
-    IF NOT EXISTS (SELECT 1 FROM productos.Producto WHERE id = @idProducto)
-    BEGIN
-        PRINT 'Error: El id del producto no existe.';
+        PRINT 'Error: El detalle de venta no existe.';
         RETURN;
     END
 
-	--Obtengo subtotal
+--Validamos que la venta exista
+    IF NOT EXISTS (SELECT 1 FROM ventas.Venta WHERE id = @idVenta)
+    BEGIN
+        PRINT 'Error: La venta no existe.';
+        RETURN;
+    END
+
+--Validamos que el producto exista
+    IF NOT EXISTS (SELECT 1 FROM productos.Producto WHERE id = @idProducto)
+    BEGIN
+        PRINT 'Error: El producto no existe.';
+        RETURN;
+    END
+
+--Obtenemos el precio unitario del producto
+    DECLARE @precioUnitario DECIMAL(10,2);
+    SELECT @precioUnitario = precioUnitario
+    FROM productos.Producto
+    WHERE id = @idProducto;
+
+--Calculamos el subtotal
     DECLARE @subtotal DECIMAL(10,2);
     SET @subtotal = @cantidad * @precioUnitario;
 
-    UPDATE ventas.DetalleFactura
-    SET idFactura = @idFactura,
+    UPDATE ventas.DetalleVenta
+    SET idVenta = @idVenta,
         idProducto = @idProducto,
         cantidad = @cantidad,
-        precioUnitario = @precioUnitario,
         subtotal = @subtotal
     WHERE id = @id;
 END;
 GO
 
---Modifico Nota Credito
+--Factura 
+
+CREATE OR ALTER PROCEDURE ventas.ModificarFactura
+    @id INT,
+    @idTipoFactura INT,
+    @idVenta INT,
+    @CUIT VARCHAR(10),
+    @fecha DATE,
+    @hora TIME,
+    @total DECIMAL(10,2),
+    @IVA DECIMAL(3,2),
+    @idPago INT,
+    @estado VARCHAR(20)
+AS
+BEGIN
+--Validamos que la factura exista
+    IF NOT EXISTS (SELECT 1 FROM ventas.Factura WHERE id = @id)
+    BEGIN
+        PRINT 'Error: La factura no existe.';
+        RETURN;
+    END
+
+--Validamos que el tipo de factura exista
+    IF NOT EXISTS (SELECT 1 FROM ventas.TipoFactura WHERE id = @idTipoFactura)
+    BEGIN
+        PRINT 'Error: El tipo de factura no existe.';
+        RETURN;
+    END
+
+--Validamos que la venta exista
+    IF NOT EXISTS (SELECT 1 FROM ventas.Venta WHERE id = @idVenta)
+    BEGIN
+        PRINT 'Error: La venta no existe.';
+        RETURN;
+    END
+
+--Validar que el pago exista
+    IF NOT EXISTS (SELECT 1 FROM ventas.Pago WHERE id = @idPago)
+    BEGIN
+        PRINT 'Error: El pago no existe.';
+        RETURN;
+    END
+
+    UPDATE ventas.Factura
+    SET idTipoFactura = @idTipoFactura,
+        idVenta = @idVenta,
+        CUIT = @CUIT,
+        fecha = @fecha,
+        hora = @hora,
+        total = @total,
+        IVA = @IVA,
+        totalConIVA = @total * (1 + @IVA),
+        idPago = @idPago,
+        estado = @estado
+    WHERE id = @id;
+END;
+GO
+
+--Nota Credito
+
 CREATE OR ALTER PROCEDURE ventas.ModificarNotaCredito
     @id INT,
     @idFactura INT,
@@ -495,16 +480,17 @@ CREATE OR ALTER PROCEDURE ventas.ModificarNotaCredito
     @motivo VARCHAR(100)
 AS
 BEGIN
-	--Verifico idNotaCredito
+--Validamos que la nota de credito exista
     IF NOT EXISTS (SELECT 1 FROM ventas.NotaCredito WHERE id = @id)
     BEGIN
-        PRINT 'Error: El id de la nota de credito no existe.';
+        PRINT 'Error: La nota de credito no existe.';
         RETURN;
     END
-	--Verifico idFactura
+
+--Validamos que la factura exista
     IF NOT EXISTS (SELECT 1 FROM ventas.Factura WHERE id = @idFactura)
     BEGIN
-        PRINT 'Error: El id de la factura no existe.';
+        PRINT 'Error: La factura no existe.';
         RETURN;
     END
 
@@ -517,51 +503,38 @@ BEGIN
 END;
 GO
 
+--Detalle Nota Credito
 
---Modifico Detalle Nota Credito
 CREATE OR ALTER PROCEDURE ventas.ModificarDetalleNotaCredito
     @id INT,
     @idNotaCredito INT,
-    @idDetalleFactura INT,
     @cantidad INT
 AS
 BEGIN
-	--Verifo idDetalleNotaCredito
+--Validamos que el detalle de la nota de credito exista
     IF NOT EXISTS (SELECT 1 FROM ventas.DetalleNotaCredito WHERE id = @id)
     BEGIN
-        PRINT 'Error: El id del detalle de la nota de credito no existe.';
+        PRINT 'Error: El detalle de la nota de credito no existe.';
         RETURN;
     END
-	--Verifico idNotaCredito
+
+--Validamos que la nota de credito exista
     IF NOT EXISTS (SELECT 1 FROM ventas.NotaCredito WHERE id = @idNotaCredito)
     BEGIN
-        PRINT 'Error: El id de la nota de credito no existe.';
-        RETURN;
-    END
-	--Verifico idDetalleFactura
-    IF NOT EXISTS (SELECT 1 FROM ventas.DetalleFactura WHERE id = @idDetalleFactura)
-    BEGIN
-        PRINT 'Error: El id del detalle de la factura no existe.';
+        PRINT 'Error: La nota de credito no existe.';
         RETURN;
     END
 
+--Calculamos el subtotal
     DECLARE @subtotal DECIMAL(10,2);
-    DECLARE @precioUnitario DECIMAL(10,2);
-	
-	--Obtengo precio unitario
-    SELECT @precioUnitario = precioUnitario
-    FROM ventas.DetalleFactura
-    WHERE id = @idDetalleFactura;
-
-    -- Calculo subtotal
-    SET @subtotal = @precioUnitario * @cantidad;
+    SELECT @subtotal = cantidad * subtotal / cantidad
+    FROM ventas.DetalleNotaCredito
+    WHERE id = @id;
 
     UPDATE ventas.DetalleNotaCredito
     SET idNotaCredito = @idNotaCredito,
-        idDetalleFactura = @idDetalleFactura,
         cantidad = @cantidad,
         subtotal = @subtotal
     WHERE id = @id;
 END;
 GO
-
