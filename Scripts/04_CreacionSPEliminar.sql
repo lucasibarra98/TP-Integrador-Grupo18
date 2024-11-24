@@ -1,17 +1,26 @@
 USE Com2900G18
 GO
 
---SCHEMA PRODUCTOS
+------SCHEMA PRODUCTOS------
 
---Elimino Linea Producto
+--Linea Producto 
+
 CREATE OR ALTER PROCEDURE productos.EliminarLineaProducto
     @id INT
 AS
 BEGIN
-	--Verifico idLineaProducto
+--Verificamos si la linea de producto existe
     IF NOT EXISTS (SELECT 1 FROM productos.LineaProducto WHERE id = @id)
     BEGIN
-        PRINT 'Error: El id de la l�nea de producto no existe.';
+        PRINT 'Error: La linea de producto no existe.';
+        RETURN;
+    END
+
+--Verificamos si la linea de producto esta asociada a alguna categoria o producto
+    IF EXISTS (SELECT 1 FROM productos.Categoria WHERE idLineaProd = @id) OR
+       EXISTS (SELECT 1 FROM productos.Producto WHERE idLineaProd = @id)
+    BEGIN
+        PRINT 'Error: No se puede eliminar la linea de producto porque esta asociada a una o mas categorias o productos.';
         RETURN;
     END
 
@@ -20,15 +29,23 @@ BEGIN
 END;
 GO
 
---Elimino Categoria
+--Categoria
+
 CREATE OR ALTER PROCEDURE productos.EliminarCategoria
     @id INT
 AS
 BEGIN
-	--Verifico idCategoria
+--Verificamos si la categoria existe
     IF NOT EXISTS (SELECT 1 FROM productos.Categoria WHERE id = @id)
     BEGIN
-        PRINT 'Error: El id de la categoria no existe.';
+        PRINT 'Error: La categoria no existe.';
+        RETURN;
+    END
+
+--Verificamos si la categoria esta asociada a algun producto
+    IF EXISTS (SELECT 1 FROM productos.Producto WHERE idLineaProd = @id)
+    BEGIN
+        PRINT 'Error: No se puede eliminar la categoria porque esta asociada a uno o mas productos.';
         RETURN;
     END
 
@@ -37,98 +54,79 @@ BEGIN
 END;
 GO
 
---Elimino Proveedor
+--Proveedor 
+
 CREATE OR ALTER PROCEDURE productos.EliminarProveedor
     @id INT
 AS
-BEGIN	
-	--Verifico idProveedor
+BEGIN
+--Verificamos si el proveedor existe
     IF NOT EXISTS (SELECT 1 FROM productos.Proveedor WHERE id = @id)
     BEGIN
-        PRINT 'Error: El id del proveedor no existe.';
+        PRINT 'Error: El proveedor no existe.';
         RETURN;
     END
 
+--Verificamos si el proveedor esta asociado a algun producto
+    IF EXISTS (SELECT 1 FROM productos.Producto WHERE idProveedor = @id)
+    BEGIN
+        PRINT 'Error: No se puede eliminar el proveedor porque esta asociado a uno o mas productos.';
+        RETURN;
+    END
+
+    -- Eliminar el proveedor
     DELETE FROM productos.Proveedor
     WHERE id = @id;
 END;
 GO
 
---Elimino Producto
-CREATE OR ALTER PROCEDURE productos.EliminarProductoLogico
+--Productos
+
+CREATE OR ALTER PROCEDURE productos.EliminarProducto
     @id INT
 AS
 BEGIN
+--Verificamos si el producto existe
     IF NOT EXISTS (SELECT 1 FROM productos.Producto WHERE id = @id)
     BEGIN
-        PRINT 'Error: El id del producto no existe.';
+        PRINT 'Error: El producto no existe.';
         RETURN;
     END
 
+--Verificamos si el producto ya esta inactivo
+    IF EXISTS (SELECT 1 FROM productos.Producto WHERE id = @id AND estado = 'I')
+    BEGIN
+        PRINT 'Error: El producto ya esta inactivo.';
+        RETURN;
+    END
+
+--Marcamos el producto como inactivo
     UPDATE productos.Producto
     SET estado = 'I'
     WHERE id = @id;
 END;
 GO
 
---SCHEMA NEGOCIO
+------SCHEMA NEGOCIO------
 
---Elimino Provincia
-CREATE OR ALTER PROCEDURE negocio.EliminarProvincia
-    @id INT
-AS
-BEGIN
-    IF NOT EXISTS (SELECT 1 FROM negocio.Provincia WHERE id = @id)
-    BEGIN
-        PRINT 'Error: El id de la provincia no existe.';
-        RETURN;
-    END
+--Sucursal
 
-    DELETE FROM negocio.Provincia
-    WHERE id = @id;
-END;
-GO
-
---Elimino Ciudad
-CREATE OR ALTER PROCEDURE negocio.EliminarCiudad
-    @id INT
-AS
-BEGIN
-    IF NOT EXISTS (SELECT 1 FROM negocio.Ciudad WHERE id = @id)
-    BEGIN
-        PRINT 'Error: El id de la ciudad no existe.';
-        RETURN;
-    END
-
-    DELETE FROM negocio.Ciudad
-    WHERE id = @id;
-END;
-GO
-
---Elimino Domicilio
-CREATE OR ALTER PROCEDURE negocio.EliminarDomicilio
-    @id INT
-AS
-BEGIN
-    IF NOT EXISTS (SELECT 1 FROM negocio.Domicilio WHERE id = @id)
-    BEGIN
-        PRINT 'Error: El id del domicilio no existe.';
-        RETURN;
-    END
-
-    DELETE FROM negocio.Domicilio
-    WHERE id = @id;
-END;
-GO
-
---Elimino Sucursal
 CREATE OR ALTER PROCEDURE negocio.EliminarSucursal
     @id INT
 AS
 BEGIN
+--Verificamos si la sucursal existe
     IF NOT EXISTS (SELECT 1 FROM negocio.Sucursal WHERE id = @id)
     BEGIN
-        PRINT 'Error: El id de la sucursal no existe.';
+        PRINT 'Error: La sucursal no existe.';
+        RETURN;
+    END
+
+--Verificamos si la sucursal esta asociada a empleados o ventas
+    IF EXISTS (SELECT 1 FROM negocio.Empleado WHERE idSucursal = @id) OR
+       EXISTS (SELECT 1 FROM ventas.Venta WHERE idSucursal = @id)
+    BEGIN
+        PRINT 'Error: No se puede eliminar la sucursal porque esta asociada a empleados o ventas.';
         RETURN;
     END
 
@@ -137,14 +135,23 @@ BEGIN
 END;
 GO
 
---Elimino Cargo
+--Cargo
+
 CREATE OR ALTER PROCEDURE negocio.EliminarCargo
     @id INT
 AS
 BEGIN
+--Verificamos si el cargo existe
     IF NOT EXISTS (SELECT 1 FROM negocio.Cargo WHERE id = @id)
     BEGIN
-        PRINT 'Error: El id del cargo no existe.';
+        PRINT 'Error: El cargo no existe.';
+        RETURN;
+    END
+
+--Verificamos si el cargo esta asociado a empleados
+    IF EXISTS (SELECT 1 FROM negocio.Empleado WHERE idCargo = @id)
+    BEGIN
+        PRINT 'Error: No se puede eliminar el cargo porque esta asociado a uno o mas empleados.';
         RETURN;
     END
 
@@ -153,14 +160,23 @@ BEGIN
 END;
 GO
 
---Elimino Empleado
+--Empleado
+
 CREATE OR ALTER PROCEDURE negocio.EliminarEmpleado
     @id INT
 AS
 BEGIN
+--Verificamos si el empleado existe
     IF NOT EXISTS (SELECT 1 FROM negocio.Empleado WHERE id = @id)
     BEGIN
-        PRINT 'Error: El id del empleado no existe.';
+        PRINT 'Error: El empleado no existe.';
+        RETURN;
+    END
+
+--Verificamos si el empleado esta asociado a ventas
+    IF EXISTS (SELECT 1 FROM ventas.Venta WHERE idEmpleado = @id)
+    BEGIN
+        PRINT 'Error: No se puede eliminar el empleado porque esta asociado a ventas.';
         RETURN;
     END
 
@@ -170,16 +186,25 @@ END;
 GO
 
 
---SCHEMA VENTAS
+------SCHEMA VENTAS------
 
---Elimino Medio Pago
+--Medio Pago
+
 CREATE OR ALTER PROCEDURE ventas.EliminarMedioPago
     @id INT
 AS
 BEGIN
+--Verificamos si el medio de pago existe
     IF NOT EXISTS (SELECT 1 FROM ventas.MedioPago WHERE id = @id)
     BEGIN
-        PRINT 'Error: El id del medio de pago no existe.';
+        PRINT 'Error: El medio de pago no existe.';
+        RETURN;
+    END
+
+--Verificamos si el medio de pago esta asociado a algun pago
+    IF EXISTS (SELECT 1 FROM ventas.Pago WHERE idMedioPago = @id)
+    BEGIN
+        PRINT 'Error: No se puede eliminar el medio de pago porque está asociado a uno o mas pagos.';
         RETURN;
     END
 
@@ -188,14 +213,23 @@ BEGIN
 END;
 GO
 
---Elimino Pago
+--Pago
+
 CREATE OR ALTER PROCEDURE ventas.EliminarPago
     @id INT
 AS
 BEGIN
+--Verificamos si el pago existe
     IF NOT EXISTS (SELECT 1 FROM ventas.Pago WHERE id = @id)
     BEGIN
-        PRINT 'Error: El id del pago no existe.';
+        PRINT 'Error: El pago no existe.';
+        RETURN;
+    END
+
+--Verificamos si el pago está asociado a alguna factura
+    IF EXISTS (SELECT 1 FROM ventas.Factura WHERE idPago = @id)
+    BEGIN
+        PRINT 'Error: No se puede eliminar el pago porque esta asociado a una o mas facturas.';
         RETURN;
     END
 
@@ -204,14 +238,23 @@ BEGIN
 END;
 GO
 
---Elimino Tipo Factura
+--Tipo Factura
+
 CREATE OR ALTER PROCEDURE ventas.EliminarTipoFactura
     @id INT
 AS
 BEGIN
+--Verificamos si el tipo de factura existe
     IF NOT EXISTS (SELECT 1 FROM ventas.TipoFactura WHERE id = @id)
     BEGIN
-        PRINT 'Error: El id del tipo de factura no existe.';
+        PRINT 'Error: El tipo de factura no existe.';
+        RETURN;
+    END
+
+--Verificamos si el tipo de factura esta asociado a alguna factura
+    IF EXISTS (SELECT 1 FROM ventas.Factura WHERE idTipoFactura = @id)
+    BEGIN
+        PRINT 'Error: No se puede eliminar el tipo de factura porque está asociado a una o mas facturas.';
         RETURN;
     END
 
@@ -220,30 +263,98 @@ BEGIN
 END;
 GO
 
---Elimino Tipo Cliente
-CREATE OR ALTER PROCEDURE ventas.EliminarTipoCliente
+--Cliente
+
+CREATE OR ALTER PROCEDURE ventas.EliminarCliente
     @id INT
 AS
 BEGIN
-    IF NOT EXISTS (SELECT 1 FROM ventas.TipoCliente WHERE id = @id)
+--Verificamos si el cliente existe
+    IF NOT EXISTS (SELECT 1 FROM ventas.Cliente WHERE id = @id)
     BEGIN
-        PRINT 'Error: El id del tipo de cliente no existe.';
+        PRINT 'Error: El cliente no existe.';
         RETURN;
     END
 
-    DELETE FROM ventas.TipoCliente
+--Verificamos si el cliente está asociado a alguna venta
+    IF EXISTS (SELECT 1 FROM ventas.Venta WHERE idCliente = @id)
+    BEGIN
+        PRINT 'Error: No se puede eliminar el cliente porque está asociado a una o mas ventas.';
+        RETURN;
+    END
+
+    DELETE FROM ventas.Cliente
     WHERE id = @id;
 END;
 GO
 
---Elimino Factura
+--Venta
+
+CREATE OR ALTER PROCEDURE ventas.EliminarVenta
+    @id INT
+AS
+BEGIN
+--Verificamos si la venta existe
+    IF NOT EXISTS (SELECT 1 FROM ventas.Venta WHERE id = @id)
+    BEGIN
+        PRINT 'Error: La venta no existe.';
+        RETURN;
+    END
+
+--Verificamos si la venta esta asociada a algún detalle de venta
+    IF EXISTS (SELECT 1 FROM ventas.DetalleVenta WHERE idVenta = @id)
+    BEGIN
+        PRINT 'Error: No se puede eliminar la venta porque tiene detalles asociados.';
+        RETURN;
+    END
+
+--Verificamos si la venta esta asociada a alguna factura
+    IF EXISTS (SELECT 1 FROM ventas.Factura WHERE idVenta = @id)
+    BEGIN
+        PRINT 'Error: No se puede eliminar la venta porque está asociada a una o mas facturas.';
+        RETURN;
+    END
+
+    DELETE FROM ventas.Venta
+    WHERE id = @id;
+END;
+GO
+
+--Detalle Venta
+
+CREATE OR ALTER PROCEDURE ventas.EliminarDetalleVenta
+    @id INT
+AS
+BEGIN
+--Verificamos si el detalle de venta existe
+    IF NOT EXISTS (SELECT 1 FROM ventas.DetalleVenta WHERE id = @id)
+    BEGIN
+        PRINT 'Error: El detalle de venta no existe.';
+        RETURN;
+    END
+
+    DELETE FROM ventas.DetalleVenta
+    WHERE id = @id;
+END;
+GO
+
+--Factura
+
 CREATE OR ALTER PROCEDURE ventas.EliminarFactura
     @id INT
 AS
 BEGIN
+--Verificar si la factura existe
     IF NOT EXISTS (SELECT 1 FROM ventas.Factura WHERE id = @id)
     BEGIN
-        PRINT 'Error: El id de la factura no existe.';
+        PRINT 'Error: El ID de la factura no existe.';
+        RETURN;
+    END
+
+--Verificar si la factura está asociada a alguna nota de credito
+    IF EXISTS (SELECT 1 FROM ventas.NotaCredito WHERE idFactura = @id)
+    BEGIN
+        PRINT 'Error: No se puede eliminar la factura porque tiene notas de credito asociadas.';
         RETURN;
     END
 
@@ -252,30 +363,16 @@ BEGIN
 END;
 GO
 
---Elimino Detalle Factura
-CREATE OR ALTER PROCEDURE ventas.EliminarDetalleFactura
-    @id INT
-AS
-BEGIN
-    IF NOT EXISTS (SELECT 1 FROM ventas.DetalleFactura WHERE id = @id)
-    BEGIN
-        PRINT 'Error: El id del detalle de factura no existe.';
-        RETURN;
-    END
+--Nota Credito
 
-    DELETE FROM ventas.DetalleFactura
-    WHERE id = @id;
-END;
-GO
-
---Elimino Nota Credito
 CREATE OR ALTER PROCEDURE ventas.EliminarNotaCredito
     @id INT
 AS
 BEGIN
+--Verificamos si la nota de credito existe
     IF NOT EXISTS (SELECT 1 FROM ventas.NotaCredito WHERE id = @id)
     BEGIN
-        PRINT 'Error: El id de la nota de credito no existe.';
+        PRINT 'Error: La nota de credito no existe.';
         RETURN;
     END
 
@@ -284,14 +381,16 @@ BEGIN
 END;
 GO
 
---Elimino Detalle Nota Credito 
+--Detalle Nota Credito
+
 CREATE OR ALTER PROCEDURE ventas.EliminarDetalleNotaCredito
     @id INT
 AS
 BEGIN
+-- Verificamos si el detalle de la nota de credito existe
     IF NOT EXISTS (SELECT 1 FROM ventas.DetalleNotaCredito WHERE id = @id)
     BEGIN
-        PRINT 'Error: El id del detalle de la nota de credito no existe.';
+        PRINT 'Error: El detalle de la nota de credito no existe.';
         RETURN;
     END
 
@@ -299,6 +398,7 @@ BEGIN
     WHERE id = @id;
 END;
 GO
+
 
 
 
