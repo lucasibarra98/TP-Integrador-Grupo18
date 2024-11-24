@@ -171,7 +171,7 @@ GO
 CREATE TABLE ventas.Pago (
     id INT IDENTITY(1,1),
     cod VARCHAR(50) UNIQUE NOT NULL, --cod hace referencia al identificador de pago
-    montoTotal DECIMAL(10,2) NOT NULL,
+    montoTotal DECIMAL(10,2),
     idMedioPago INT NOT NULL,
     CONSTRAINT PK_Pago PRIMARY KEY (id),
     CONSTRAINT FK_Pago_MedioPago FOREIGN KEY (idMedioPago) REFERENCES ventas.MedioPago (id)
