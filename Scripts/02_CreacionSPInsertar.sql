@@ -208,29 +208,50 @@ GO
 --Pago
 
 CREATE OR ALTER PROCEDURE ventas.InsertarPago
-    @cod VARCHAR(50),
-    @montoTotal DECIMAL(10,2),
-    @idMedioPago INT
+    @idFactura INT,
+    @idMedioPago INT,
+    @cod VARCHAR(50)
 AS
 BEGIN
---Validamos existencia del medio de pago en los registros
-    IF NOT EXISTS (SELECT 1 FROM ventas.MedioPago WHERE id = @idMedioPago)
-    BEGIN
-        PRINT 'Error: El medio de pago no existe.';
-        RETURN;
-    END
+    BEGIN TRY
+      
+        DECLARE @totalConIVA DECIMAL(10,2);
 
-    IF NOT EXISTS (SELECT 1 FROM ventas.Pago WHERE cod = @cod)
-    BEGIN
+--Validamos la existencia de la factura
+        IF NOT EXISTS (SELECT 1 FROM ventas.Factura WHERE id = @idFactura)
+        BEGIN
+            PRINT 'Error: La factura no existe.';
+            RETURN;
+        END
+
+--Validamos la existencia del medio de pago
+        IF NOT EXISTS (SELECT 1 FROM ventas.MedioPago WHERE id = @idMedioPago)
+        BEGIN
+            PRINT 'Error: El medio de pago no existe.';
+            RETURN;
+        END
+
+--Obtenemos el total con IVA de la factura
+        SELECT @totalConIVA = totalConIVA FROM ventas.Factura WHERE id = @idFactura;
+
+--Insertamos el pago con el monto total derivado del totalConIVA
         INSERT INTO ventas.Pago (cod, montoTotal, idMedioPago)
-        VALUES (@cod, @montoTotal, @idMedioPago);
-    END
-    ELSE
-    BEGIN
-        PRINT 'Error: El codigo del pago ya existe.';
-    END
+        VALUES (@cod, @totalConIVA, @idMedioPago);
+
+--Obtenemos el ID del pago recién creado
+        DECLARE @idPago INT = SCOPE_IDENTITY();
+
+--Actualizar el estado de la factura a "Pagada"
+        UPDATE ventas.Factura
+        SET idPago = @idPago, estado = 'Pagada'
+        WHERE id = @idFactura;
+    END TRY
+    BEGIN CATCH
+        PRINT 'Error al realizar el pago: ' + ERROR_MESSAGE();
+    END CATCH
 END;
 GO
+
 
 
 --Tipo Factura
@@ -282,35 +303,74 @@ CREATE OR ALTER PROCEDURE ventas.InsertarVenta
     @idEmpleado INT,
     @idSucursal INT,
     @fecha DATE,
-    @hora TIME,
-    @totalSinIVA DECIMAL(10,2)
+    @hora TIME
 AS
 BEGIN
---Validamos exitencia de cliente
-    IF NOT EXISTS (SELECT 1 FROM ventas.Cliente WHERE id = @idCliente)
-    BEGIN
-        PRINT 'Error: El cliente no existe.';
-        RETURN;
-    END
+    BEGIN TRY
+--Verificamos que el cliente existe
+        IF NOT EXISTS (SELECT 1 FROM ventas.Cliente WHERE id = @idCliente)
+        BEGIN
+            PRINT 'Error: El cliente no existe.';
+            RETURN;
+        END
 
---Validamos existencia de empleado
-    IF NOT EXISTS (SELECT 1 FROM negocio.Empleado WHERE id = @idEmpleado)
-    BEGIN
-        PRINT 'Error: El empleado no existe.';
-        RETURN;
-    END
+--Verificamos que el empleado existe
+        IF NOT EXISTS (SELECT 1 FROM negocio.Empleado WHERE id = @idEmpleado)
+        BEGIN
+            PRINT 'Error: El empleado no existe.';
+            RETURN;
+        END
 
---Validamos existencia de sucursal
-    IF NOT EXISTS (SELECT 1 FROM negocio.Sucursal WHERE id = @idSucursal)
-    BEGIN
-        PRINT 'Error: La sucursal no existe.';
-        RETURN;
-    END
+--Verificamos que la sucursal existe
+        IF NOT EXISTS (SELECT 1 FROM negocio.Sucursal WHERE id = @idSucursal)
+        BEGIN
+            PRINT 'Error: La sucursal no existe.';
+            RETURN;
+        END
 
-    INSERT INTO ventas.Venta (idCliente, idEmpleado, idSucursal, fecha, hora, totalSinIVA)
-    VALUES (@idCliente, @idEmpleado, @idSucursal, @fecha, @hora, @totalSinIVA);
+        INSERT INTO ventas.Venta (idCliente, idEmpleado, idSucursal, fecha, hora, totalSinIVA)
+        VALUES (@idCliente, @idEmpleado, @idSucursal, @fecha, @hora, NULL);
+
+    END TRY
+    BEGIN CATCH
+        PRINT 'Error al insertar la venta.';
+    END CATCH
 END;
 GO
+
+--Actualizar total de la venta luego de insertar todos los detalles 
+
+CREATE OR ALTER PROCEDURE ventas.ActualizarTotalVenta
+    @idVenta INT
+AS
+BEGIN
+    BEGIN TRY
+        DECLARE @totalSinIVA DECIMAL(10,2);
+
+--Verificamos que la venta existe
+        IF NOT EXISTS (SELECT 1 FROM ventas.Venta WHERE id = @idVenta)
+        BEGIN
+            PRINT 'Error: La venta no existe.';
+            RETURN;
+        END
+
+--Calculamos el totalSinIVA como la suma de los subtotales de los detalles de venta asociados
+        SELECT @totalSinIVA = SUM(subtotal)
+        FROM ventas.DetalleVenta
+        WHERE idVenta = @idVenta;
+
+--Actualizamos el totalSinIVA en la tabla ventas.Venta
+        UPDATE ventas.Venta
+        SET totalSinIVA = @totalSinIVA
+        WHERE id = @idVenta;
+
+    END TRY
+    BEGIN CATCH
+        PRINT 'Ocurrió un error al actualizar el total de la venta.';
+    END CATCH
+END;
+GO
+
 
 --Detalle Venta
 
@@ -320,32 +380,52 @@ CREATE OR ALTER PROCEDURE ventas.InsertarDetalleVenta
     @cantidad INT
 AS
 BEGIN
---Validamos que la venta exista
-    IF NOT EXISTS (SELECT 1 FROM ventas.Venta WHERE id = @idVenta)
-    BEGIN
-        PRINT 'Error: La venta no existe.';
-        RETURN;
-    END
+    BEGIN TRY
+        DECLARE @precioUnitario DECIMAL(10,2);
+        DECLARE @subtotal DECIMAL(10,2);
+        DECLARE @cotizacionDolar DECIMAL(10,2) = 1; -- Por defecto, 1 si no es importado
+        DECLARE @catalogo CHAR(3);
 
---Validamos que el producto exista
-    IF NOT EXISTS (SELECT 1 FROM productos.Producto WHERE id = @idProducto)
-    BEGIN
-        PRINT 'Error: El producto no existe.';
-        RETURN;
-    END
---Obtenemos el precio unitario del producto
-    DECLARE @precioUnitario DECIMAL(10,2);
-    SELECT @precioUnitario = precioUnitario
-    FROM productos.Producto
-    WHERE id = @idProducto;
---Calculamos el subtotal
-    DECLARE @subtotal DECIMAL(10,2);
-    SET @subtotal = @cantidad * @precioUnitario;
+--Verificamos que el producto exista
+        IF NOT EXISTS (SELECT 1 FROM productos.Producto WHERE id = @idProducto)
+        BEGIN
+            PRINT 'Error: El producto no existe.';
+            RETURN;
+        END
 
-    INSERT INTO ventas.DetalleVenta (idVenta, idProducto, cantidad, subtotal)
-    VALUES (@idVenta, @idProducto, @cantidad, @subtotal);
+--Verificamos que la venta exista
+        IF NOT EXISTS (SELECT 1 FROM ventas.Venta WHERE id = @idVenta)
+        BEGIN
+            PRINT 'Error: La venta no existe.';
+            RETURN;
+        END
+
+--Obtenemos precio unitario y catalogo del producto
+        SELECT @precioUnitario = precioUnitario,
+               @catalogo = catalogo
+        FROM productos.Producto
+        WHERE id = @idProducto;
+
+--Obtenemos cotización si el producto es importado
+        IF @catalogo = 'IMP'
+        BEGIN
+            EXEC obtenerCotizacion @cotizacionDolar OUTPUT;
+        END
+
+--Calculamos subtotal
+        SET @subtotal = @precioUnitario * @cotizacionDolar * @cantidad;
+
+        INSERT INTO ventas.DetalleVenta (idVenta, idProducto, cantidad, subtotal)
+        VALUES (@idVenta, @idProducto, @cantidad, @subtotal);
+
+        PRINT 'Detalle de venta insertado correctamente.';
+    END TRY
+    BEGIN CATCH
+        PRINT 'Error al insertar el detalle de venta: ' + ERROR_MESSAGE();
+    END CATCH
 END;
 GO
+
 
 
 
@@ -358,40 +438,40 @@ CREATE OR ALTER PROCEDURE ventas.InsertarFactura
     @fecha DATE,
     @hora TIME,
     @IVA DECIMAL(3,2),
-    @idPago INT
+    @idPago INT = NULL
 AS
 BEGIN
---Validamos el correcto tipo de factura 
-    IF NOT EXISTS (SELECT 1 FROM ventas.TipoFactura WHERE id = @idTipoFactura)
-    BEGIN
-        PRINT 'Error: El tipo de factura no existe.';
-        RETURN;
-    END
+    BEGIN TRY
+        DECLARE @totalSinIVA DECIMAL(10,2);
+        DECLARE @totalConIVA DECIMAL(10,2);
 
---Validamos que la venta exista
-    IF NOT EXISTS (SELECT 1 FROM ventas.Venta WHERE id = @idVenta)
-    BEGIN
-        PRINT 'Error: La venta no existe.';
-        RETURN;
-    END
---Validamos que el pago exista
-    IF NOT EXISTS (SELECT 1 FROM ventas.Pago WHERE id = @idPago)
-    BEGIN
-        PRINT 'Error: El pago no existe.';
-        RETURN;
-    END
+--Verificamos que la venta existe
+        IF NOT EXISTS (SELECT 1 FROM ventas.Venta WHERE id = @idVenta)
+        BEGIN
+            PRINT 'Error: La venta no existe.';
+            RETURN;
+        END
 
---Calculamos total con IVA
-    DECLARE @totalSinIVA DECIMAL(10,2);
-    SELECT @totalSinIVA = totalSinIVA FROM ventas.Venta WHERE id = @idVenta;
+--Obtenemos el totalSinIVA de la venta
+        SELECT @totalSinIVA = totalSinIVA FROM ventas.Venta WHERE id = @idVenta;
 
-    DECLARE @totalConIVA DECIMAL(10,2);
-    SET @totalConIVA = @totalSinIVA * (1 + @IVA);
+--Calculamos el total con IVA
+        SET @totalConIVA = @totalSinIVA * (1 + @IVA);
 
-    INSERT INTO ventas.Factura (idTipoFactura, idVenta, CUIT, fecha, hora, total, IVA, totalConIVA, idPago)
-    VALUES (@idTipoFactura, @idVenta, @CUIT, @fecha, @hora, @totalSinIVA, @IVA, @totalConIVA, @idPago);
+        -- Insertar la factura
+        INSERT INTO ventas.Factura (idTipoFactura, idVenta, CUIT, fecha, hora, total, IVA, totalConIVA, idPago, estado)
+        VALUES (@idTipoFactura, @idVenta, @CUIT, @fecha, @hora, @totalSinIVA, @IVA, @totalConIVA, @idPago,
+                CASE WHEN @idPago IS NOT NULL THEN 'Pagada' ELSE 'Pendiente' END);
+    END TRY
+    BEGIN CATCH
+        PRINT 'Error al insertar la factura.';
+    END CATCH
 END;
 GO
+
+
+
+
 
 --Nota Credito
 
@@ -433,5 +513,6 @@ BEGIN
     VALUES (@idNotaCredito, @cantidad, @subtotal);
 END;
 GO
+
 
 
