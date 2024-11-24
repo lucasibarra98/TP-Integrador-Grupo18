@@ -70,6 +70,9 @@ GO
 CREATE SCHEMA importacion
 GO
 
+CREATE SCHEMA reportes
+GO
+
 									-----------TABLAS-----------
 -- SCHEMA productos
 CREATE TABLE productos.LineaProducto
@@ -224,7 +227,7 @@ GO
 CREATE TABLE ventas.Factura (
     id INT IDENTITY(1,1),
 	idTipoFactura INT NOT NULL,
-	idVenta INT NOT NULL,
+	idVenta INT UNIQUE NOT NULL,
 	CUIT VARCHAR(10) NOT NULL ,
 	fecha DATE NOT NULL,
     hora TIME NOT NULL,
