@@ -1,9 +1,10 @@
 USE Com2900G18
 GO
 
---SCHEMA PRODUCTOS
+------SCHEMA PRODUCTOS------
 
--- Inserta linea de producto
+--Linea Producto
+
 CREATE OR ALTER PROCEDURE productos.InsertarLineaProducto
     @nombre VARCHAR(40)
 AS
@@ -15,30 +16,40 @@ BEGIN
     END
     ELSE
     BEGIN
-        PRINT 'Error: El nombre de la linea de producto ya existe.';
+        PRINT 'Error: La linea de producto ya existe.';
     END
 END;
 GO
 
--- Inserta categoria
+
+--Categoria 
+
 CREATE OR ALTER PROCEDURE productos.InsertarCategoria
     @nombre VARCHAR(50),
     @idLineaProd INT
 AS
 BEGIN
-    IF EXISTS (SELECT 1 FROM productos.LineaProducto WHERE id = @idLineaProd)
+--Validamos que exista la linea de producto asociada 
+    IF NOT EXISTS (SELECT 1 FROM productos.LineaProducto WHERE id = @idLineaProd)
+    BEGIN
+        PRINT 'Error: La linea de producto asociada no existe.';
+        RETURN;
+    END
+
+    IF NOT EXISTS (SELECT 1 FROM productos.Categoria WHERE nombre = @nombre)
     BEGIN
         INSERT INTO productos.Categoria (nombre, idLineaProd)
         VALUES (@nombre, @idLineaProd);
     END
     ELSE
     BEGIN
-        PRINT 'Error: El id de la linea de producto no existe.';
+        PRINT 'Error: La categoria ya existe.';
     END
 END;
 GO
 
--- Inserta proveedor
+--Proveedor
+
 CREATE OR ALTER PROCEDURE productos.InsertarProveedor
     @nombre VARCHAR(50)
 AS
@@ -50,136 +61,73 @@ BEGIN
     END
     ELSE
     BEGIN
-        PRINT 'Error: El nombre del proveedor ya existe.';
+        PRINT 'Error: El proveedor ya existe.';
     END
 END;
 GO
 
--- Inserta producto
--- Inserta un nuevo producto
+--Producto
+
 CREATE OR ALTER PROCEDURE productos.InsertarProducto
     @nombre VARCHAR(100),
-    @precioUnitario DECIMAL(10,2),
-    @cantidadPorUnidad VARCHAR(30),
     @idLineaProd INT,
-    @idProveedor INT,
+    @idProveedor INT = NULL,
+    @precioUnitario DECIMAL(10,2),
+    @cantidadPorUnidad VARCHAR(30) = NULL,
     @catalogo CHAR(3)
 AS
 BEGIN
-    -- Verifico idLineaProd
+--Validamos que este correcta la linea de producto asociada
     IF NOT EXISTS (SELECT 1 FROM productos.LineaProducto WHERE id = @idLineaProd)
     BEGIN
-        PRINT 'Error: El id de la línea de producto no existe.';
+        PRINT 'Error: La linea de producto asociada no existe.';
+        RETURN;
+    END
+--Validamos que el proveedor este en la tabla de proveedores
+    IF @idProveedor IS NOT NULL AND NOT EXISTS (SELECT 1 FROM productos.Proveedor WHERE id = @idProveedor)
+    BEGIN
+        PRINT 'Error: El proveedor asociado no existe.';
         RETURN;
     END
 
-    -- Verifico idProveedor
-    IF NOT EXISTS (SELECT 1 FROM productos.Proveedor WHERE id = @idProveedor)
+    IF NOT EXISTS (SELECT 1 FROM productos.Producto WHERE nombre = @nombre)
     BEGIN
-        PRINT 'Error: El id del proveedor no existe.';
-        RETURN;
-    END
-
-    -- Verifico producto
-    IF EXISTS (SELECT 1 FROM productos.Producto WHERE nombre = @nombre)
-    BEGIN
-        PRINT 'Error: El nombre del producto ya existe.';
-        RETURN;
-    END
-
-    -- Inserto producto
-    INSERT INTO productos.Producto (nombre, precioUnitario, cantidadPorUnidad, idLineaProd, idProveedor, catalogo)
-    VALUES (@nombre, @precioUnitario, @cantidadPorUnidad, @idLineaProd, @idProveedor, @catalogo);
-END;
-GO
-
-
---SCHEMA NEGOCIO
-
--- Inserto provincia
-CREATE OR ALTER PROCEDURE negocio.InsertarProvincia
-    @nombre VARCHAR(50)
-AS
-BEGIN
-    IF NOT EXISTS (SELECT 1 FROM negocio.Provincia WHERE nombre = @nombre)
-    BEGIN
-        INSERT INTO negocio.Provincia (nombre)
-        VALUES (@nombre);
+        INSERT INTO productos.Producto (nombre, idLineaProd, idProveedor, precioUnitario, cantidadPorUnidad, catalogo)
+        VALUES (@nombre, @idLineaProd, @idProveedor, @precioUnitario, @cantidadPorUnidad, @catalogo);
     END
     ELSE
     BEGIN
-        PRINT 'Error: El nombre de la provincia ya existe.';
+        PRINT 'Error: El producto ya existe.';
     END
 END;
 GO
 
--- Inserto ciudad
-CREATE OR ALTER PROCEDURE negocio.InsertarCiudad
-    @nombre VARCHAR(50),
-    @reemplazaPor VARCHAR(50) = NULL,
-    @idProvincia INT
-AS
-BEGIN
-    -- Verifico idProvincia
-    IF NOT EXISTS (SELECT 1 FROM negocio.Provincia WHERE id = @idProvincia)
-    BEGIN
-        PRINT 'Error: El id de la provincia no existe.';
-        RETURN;
-    END
+------SCHEMA NEGOCIO------
 
-    -- Verifico nombre ciudad
-    IF EXISTS (SELECT 1 FROM negocio.Ciudad WHERE nombre = @nombre)
-    BEGIN
-        PRINT 'Error: El nombre de la ciudad ya existe.';
-        RETURN;
-    END
+--Sucursal
 
-    -- Inserto ciudad
-    INSERT INTO negocio.Ciudad (nombre, reemplazaPor, idProvincia)
-    VALUES (@nombre, @reemplazaPor, @idProvincia);
-END;
-GO
-
--- Inserta domicilio
-CREATE OR ALTER PROCEDURE negocio.InsertarDomicilio
-    @calle VARCHAR(50),
-    @numero INT,
-    @idCiudad INT,
-    @codigoPostal VARCHAR(8)
-AS
-BEGIN
-    IF EXISTS (SELECT 1 FROM negocio.Ciudad WHERE id = @idCiudad)
-    BEGIN
-        INSERT INTO negocio.Domicilio (calle, numero, idCiudad, codigoPostal)
-        VALUES (@calle, @numero, @idCiudad, @codigoPostal);
-    END
-    ELSE
-    BEGIN
-        PRINT 'Error: El id de la ciudad no existe.';
-    END
-END;
-GO
-
--- Inserta sucursal
 CREATE OR ALTER PROCEDURE negocio.InsertarSucursal
-    @idDomicilio INT,
+    @nombre VARCHAR(50),
+    @direccion VARCHAR(100),
     @horario VARCHAR(100),
-    @telefono CHAR(9)
+    @telefono CHAR(9),
+    @ciudad VARCHAR(50)
 AS
 BEGIN
-    IF EXISTS (SELECT 1 FROM negocio.Domicilio WHERE id = @idDomicilio)
+    IF NOT EXISTS (SELECT 1 FROM negocio.Sucursal WHERE direccion = @direccion)
     BEGIN
-        INSERT INTO negocio.Sucursal (idDomicilio, horario, telefono)
-        VALUES (@idDomicilio, @horario, @telefono);
+        INSERT INTO negocio.Sucursal (nombre, direccion, horario, telefono, ciudad)
+        VALUES (@nombre, @direccion, @horario, @telefono, @ciudad);
     END
     ELSE
     BEGIN
-        PRINT 'Error: El id del domicilio no existe.';
+        PRINT 'Error: La sucursal con esta direccion ya existe.';
     END
 END;
 GO
 
--- Inserta cargo
+--Cargo
+
 CREATE OR ALTER PROCEDURE negocio.InsertarCargo
     @nombre VARCHAR(30)
 AS
@@ -191,17 +139,18 @@ BEGIN
     END
     ELSE
     BEGIN
-        PRINT 'Error: El nombre del cargo ya existe.';
+        PRINT 'Error: El cargo ya existe.';
     END
 END;
 GO
 
--- Inserta empleado
+--Empleado 
+
 CREATE OR ALTER PROCEDURE negocio.InsertarEmpleado
     @nombre VARCHAR(100),
     @apellido VARCHAR(100),
     @dni INT,
-    @idDomicilio INT,
+    @domicilio VARCHAR(100),
     @emailPersonal VARCHAR(100),
     @emailEmpresa VARCHAR(100),
     @cuil BIGINT,
@@ -210,61 +159,87 @@ CREATE OR ALTER PROCEDURE negocio.InsertarEmpleado
     @turno VARCHAR(20)
 AS
 BEGIN
-    -- Verifico idDomicilio
-    IF NOT EXISTS (SELECT 1 FROM negocio.Domicilio WHERE id = @idDomicilio)
-    BEGIN
-        PRINT 'Error: El id del domicilio no existe.';
-        RETURN;
-    END
-
-    -- Verifico idCargo
+--Validamos la existencia del cargo dentro de los registros
     IF NOT EXISTS (SELECT 1 FROM negocio.Cargo WHERE id = @idCargo)
     BEGIN
-        PRINT 'Error: El id del cargo no existe.';
+        PRINT 'Error: El cargo asociado no existe.';
         RETURN;
     END
-
-    -- Verifico idSucursal
+--Validamos la existencia de la sucursal dentro de los registros
     IF NOT EXISTS (SELECT 1 FROM negocio.Sucursal WHERE id = @idSucursal)
     BEGIN
-        PRINT 'Error: El id de la sucursal no existe.';
+        PRINT 'Error: La sucursal asociada no existe.';
         RETURN;
     END
 
-    -- Realizo la insercion
-    INSERT INTO negocio.Empleado (nombre, apellido, dni, idDomicilio, emailPersonal, emailEmpresa, cuil, idCargo, idSucursal, turno)
-    VALUES (@nombre, @apellido, @dni, @idDomicilio, @emailPersonal, @emailEmpresa, @cuil, @idCargo, @idSucursal, @turno);
-END;
-GO
-
-
---SCHEMA VENTAS
-
--- Inserta medio de pago
-CREATE OR ALTER PROCEDURE ventas.InsertarMedioPago
-    @nombre VARCHAR(50),
-    @reemplazaPor VARCHAR(50)
-AS
-BEGIN
-	-- Verifico nombre
-    IF NOT EXISTS (SELECT 1 FROM ventas.MedioPago WHERE nombre = @nombre)
+    IF NOT EXISTS (SELECT 1 FROM negocio.Empleado WHERE dni = @dni)
     BEGIN
-        INSERT INTO ventas.MedioPago (nombre,reemplazaPor)
-        VALUES (@nombre,@reemplazaPor);
+        INSERT INTO negocio.Empleado (nombre, apellido, dni, domicilio, emailPersonal, emailEmpresa, cuil, idCargo, idSucursal, turno)
+        VALUES (@nombre, @apellido, @dni, @domicilio, @emailPersonal, @emailEmpresa, @cuil, @idCargo, @idSucursal, @turno);
     END
     ELSE
     BEGIN
-        PRINT 'Error: El nombre del medio de pago ya existe.';
+        PRINT 'Error: El empleado ya existe.';
     END
 END;
 GO
 
--- Inserta tipo de factura
+------SCHEMA VENTAS------
+
+--Medio de pago
+
+CREATE OR ALTER PROCEDURE ventas.InsertarMedioPago
+    @nombre VARCHAR(50),
+    @reemplazaPor VARCHAR(50) = NULL
+AS
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM ventas.MedioPago WHERE nombre = @nombre)
+    BEGIN
+        INSERT INTO ventas.MedioPago (nombre, reemplazaPor)
+        VALUES (@nombre, @reemplazaPor);
+    END
+    ELSE
+    BEGIN
+        PRINT 'Error: El medio de pago ya existe.';
+    END
+END;
+GO
+
+--Pago
+
+CREATE OR ALTER PROCEDURE ventas.InsertarPago
+    @cod VARCHAR(50),
+    @montoTotal DECIMAL(10,2),
+    @idMedioPago INT
+AS
+BEGIN
+--Validamos existencia del medio de pago en los registros
+    IF NOT EXISTS (SELECT 1 FROM ventas.MedioPago WHERE id = @idMedioPago)
+    BEGIN
+        PRINT 'Error: El medio de pago no existe.';
+        RETURN;
+    END
+
+    IF NOT EXISTS (SELECT 1 FROM ventas.Pago WHERE cod = @cod)
+    BEGIN
+        INSERT INTO ventas.Pago (cod, montoTotal, idMedioPago)
+        VALUES (@cod, @montoTotal, @idMedioPago);
+    END
+    ELSE
+    BEGIN
+        PRINT 'Error: El codigo del pago ya existe.';
+    END
+END;
+GO
+
+
+--Tipo Factura
+
 CREATE OR ALTER PROCEDURE ventas.InsertarTipoFactura
     @sigla CHAR(1)
 AS
 BEGIN
-	-- Verifico sigla
+--Validamos unique en sigla de tipo factura
     IF NOT EXISTS (SELECT 1 FROM ventas.TipoFactura WHERE sigla = @sigla)
     BEGIN
         INSERT INTO ventas.TipoFactura (sigla)
@@ -277,138 +252,149 @@ BEGIN
 END;
 GO
 
--- Inserta tipo de cliente
-CREATE OR ALTER PROCEDURE ventas.InsertarTipoCliente
-    @nombre VARCHAR(50)
+--Cliente
+
+CREATE OR ALTER PROCEDURE ventas.InsertarCliente
+    @nombre VARCHAR(50),
+    @apellido VARCHAR(50),
+    @dni INT,
+    @genero VARCHAR(20),
+    @tipoCliente VARCHAR(20)
 AS
 BEGIN
-	-- Verifico nombre
-    IF NOT EXISTS (SELECT 1 FROM ventas.TipoCliente WHERE nombre = @nombre)
+--Validamos DNI unique
+    IF NOT EXISTS (SELECT 1 FROM ventas.Cliente WHERE dni = @dni)
     BEGIN
-        INSERT INTO ventas.TipoCliente (nombre)
-        VALUES (@nombre);
+        INSERT INTO ventas.Cliente (nombre, apellido, dni, genero, tipoCliente)
+        VALUES (@nombre, @apellido, @dni, @genero, @tipoCliente);
     END
     ELSE
     BEGIN
-        PRINT 'Error: El nombre del tipo de cliente ya existe.';
+        PRINT 'Error: El cliente con este DNI ya existe.';
     END
 END;
 GO
 
--- Inserta factura
-CREATE OR ALTER PROCEDURE ventas.InsertarFactura
-    @idTipoFactura INT,
-    @idTipoCliente INT,
-    @genero VARCHAR(10),
+--Venta
+
+CREATE OR ALTER PROCEDURE ventas.InsertarVenta
+    @idCliente INT,
+    @idEmpleado INT,
+    @idSucursal INT,
     @fecha DATE,
     @hora TIME,
-    @total DECIMAL(10,2),
-    @idPago INT,
-    @idEmpleado INT,
-    @idSucursal INT
+    @totalSinIVA DECIMAL(10,2)
 AS
 BEGIN
-    -- Verifico idTipoFactura
-    IF NOT EXISTS (SELECT 1 FROM ventas.TipoFactura WHERE id = @idTipoFactura)
+--Validamos exitencia de cliente
+    IF NOT EXISTS (SELECT 1 FROM ventas.Cliente WHERE id = @idCliente)
     BEGIN
-        PRINT 'Error: El id del tipo de factura no existe.';
+        PRINT 'Error: El cliente no existe.';
         RETURN;
     END
 
-    -- Verifico idTipoCliente
-    IF NOT EXISTS (SELECT 1 FROM ventas.TipoCliente WHERE id = @idTipoCliente)
-    BEGIN
-        PRINT 'Error: El id del tipo de cliente no existe.';
-        RETURN;
-    END
-
-    -- Verifico idPago
-    IF NOT EXISTS (SELECT 1 FROM ventas.Pago WHERE id = @idPago)
-    BEGIN
-        PRINT 'Error: El id del pago no existe.';
-        RETURN;
-    END
-
-    -- Verifico idEmpleado
+--Validamos existencia de empleado
     IF NOT EXISTS (SELECT 1 FROM negocio.Empleado WHERE id = @idEmpleado)
     BEGIN
-        PRINT 'Error: El id del empleado no existe.';
+        PRINT 'Error: El empleado no existe.';
         RETURN;
     END
 
-    -- Verifico idSucursal
+--Validamos existencia de sucursal
     IF NOT EXISTS (SELECT 1 FROM negocio.Sucursal WHERE id = @idSucursal)
     BEGIN
-        PRINT 'Error: El id de la sucursal no existe.';
+        PRINT 'Error: La sucursal no existe.';
         RETURN;
     END
 
-    -- Realizo la insercion
-    INSERT INTO ventas.Factura (idTipoFactura, idTipoCliente, genero, fecha, hora, total, idPago, idEmpleado, idSucursal)
-    VALUES (@idTipoFactura, @idTipoCliente, @genero, @fecha, @hora, @total, @idPago, @idEmpleado, @idSucursal);
+    INSERT INTO ventas.Venta (idCliente, idEmpleado, idSucursal, fecha, hora, totalSinIVA)
+    VALUES (@idCliente, @idEmpleado, @idSucursal, @fecha, @hora, @totalSinIVA);
 END;
 GO
 
+--Detalle Venta
 
--- Inserta pago
-CREATE OR ALTER PROCEDURE ventas.InsertarPago
-    @cod VARCHAR(50),
-    @montoTotal DECIMAL(10,2),
-    @idMedioPago INT
-AS
-BEGIN
-    -- Verifico idMedioPago
-    IF NOT EXISTS (SELECT 1 FROM ventas.MedioPago WHERE id = @idMedioPago)
-    BEGIN
-        PRINT 'Error: El id del medio de pago no existe.';
-        RETURN;
-    END
-
-    -- Verifico codigo pago no duplicado
-    IF EXISTS (SELECT 1 FROM ventas.Pago WHERE cod = @cod)
-    BEGIN
-        PRINT 'Error: El codigo de pago ya existe.';
-        RETURN;
-    END
-
-    -- Inserta el registro si todas las condiciones se cumplen
-    INSERT INTO ventas.Pago (cod, montoTotal, idMedioPago)
-    VALUES (@cod, @montoTotal, @idMedioPago);
-END;
-GO
-
--- Inserta detalle de factura
-CREATE OR ALTER PROCEDURE ventas.InsertarDetalleFactura
-    @idFactura INT,
+CREATE OR ALTER PROCEDURE ventas.InsertarDetalleVenta
+    @idVenta INT,
     @idProducto INT,
-    @cantidad INT,
-    @precioUnitario DECIMAL(10,2)
+    @cantidad INT
 AS
 BEGIN
-    IF NOT EXISTS (SELECT 1 FROM ventas.Factura WHERE id = @idFactura)
+--Validamos que la venta exista
+    IF NOT EXISTS (SELECT 1 FROM ventas.Venta WHERE id = @idVenta)
     BEGIN
-        PRINT 'Error: El id de la factura no existe.';
+        PRINT 'Error: La venta no existe.';
         RETURN;
     END
 
-    -- Verifico idProducto
+--Validamos que el producto exista
     IF NOT EXISTS (SELECT 1 FROM productos.Producto WHERE id = @idProducto)
     BEGIN
-        PRINT 'Error: El id del producto no existe.';
+        PRINT 'Error: El producto no existe.';
         RETURN;
     END
-
-    -- Calculo subtotal
+--Obtenemos el precio unitario del producto
+    DECLARE @precioUnitario DECIMAL(10,2);
+    SELECT @precioUnitario = precioUnitario
+    FROM productos.Producto
+    WHERE id = @idProducto;
+--Calculamos el subtotal
     DECLARE @subtotal DECIMAL(10,2);
     SET @subtotal = @cantidad * @precioUnitario;
 
-    -- Inserto detalle de factura
-    INSERT INTO ventas.DetalleFactura (idFactura, idProducto, cantidad, precioUnitario, subtotal)
-    VALUES (@idFactura, @idProducto, @cantidad, @precioUnitario, @subtotal);
-END
+    INSERT INTO ventas.DetalleVenta (idVenta, idProducto, cantidad, subtotal)
+    VALUES (@idVenta, @idProducto, @cantidad, @subtotal);
+END;
 GO
 
--- Inserta nota de credito
+
+
+--Factura
+
+CREATE OR ALTER PROCEDURE ventas.InsertarFactura
+    @idTipoFactura INT,
+    @idVenta INT,
+    @CUIT VARCHAR(10),
+    @fecha DATE,
+    @hora TIME,
+    @IVA DECIMAL(3,2),
+    @idPago INT
+AS
+BEGIN
+--Validamos el correcto tipo de factura 
+    IF NOT EXISTS (SELECT 1 FROM ventas.TipoFactura WHERE id = @idTipoFactura)
+    BEGIN
+        PRINT 'Error: El tipo de factura no existe.';
+        RETURN;
+    END
+
+--Validamos que la venta exista
+    IF NOT EXISTS (SELECT 1 FROM ventas.Venta WHERE id = @idVenta)
+    BEGIN
+        PRINT 'Error: La venta no existe.';
+        RETURN;
+    END
+--Validamos que el pago exista
+    IF NOT EXISTS (SELECT 1 FROM ventas.Pago WHERE id = @idPago)
+    BEGIN
+        PRINT 'Error: El pago no existe.';
+        RETURN;
+    END
+
+--Calculamos total con IVA
+    DECLARE @totalSinIVA DECIMAL(10,2);
+    SELECT @totalSinIVA = totalSinIVA FROM ventas.Venta WHERE id = @idVenta;
+
+    DECLARE @totalConIVA DECIMAL(10,2);
+    SET @totalConIVA = @totalSinIVA * (1 + @IVA);
+
+    INSERT INTO ventas.Factura (idTipoFactura, idVenta, CUIT, fecha, hora, total, IVA, totalConIVA, idPago)
+    VALUES (@idTipoFactura, @idVenta, @CUIT, @fecha, @hora, @totalSinIVA, @IVA, @totalConIVA, @idPago);
+END;
+GO
+
+--Nota Credito
+
 CREATE OR ALTER PROCEDURE ventas.InsertarNotaCredito
     @idFactura INT,
     @fecha DATE,
@@ -416,53 +402,36 @@ CREATE OR ALTER PROCEDURE ventas.InsertarNotaCredito
     @motivo VARCHAR(100)
 AS
 BEGIN
-	--Verifico idFactura
-    IF EXISTS (SELECT 1 FROM ventas.Factura WHERE id = @idFactura)
+ --Validamos que la factura exista
+    IF NOT EXISTS (SELECT 1 FROM ventas.Factura WHERE id = @idFactura)
     BEGIN
-        INSERT INTO ventas.NotaCredito (idFactura, fecha, total, motivo)
-        VALUES (@idFactura, @fecha, @total, @motivo);
+        PRINT 'Error: La factura no existe.';
+        RETURN;
     END
-    ELSE
-    BEGIN
-        PRINT 'Error: El id de la factura no existe.';
-    END
+
+    INSERT INTO ventas.NotaCredito (idFactura, fecha, total, motivo)
+    VALUES (@idFactura, @fecha, @total, @motivo);
 END;
 GO
 
--- Inserta detalle de nota de credito
+--Detalle Nota Credito
+
 CREATE OR ALTER PROCEDURE ventas.InsertarDetalleNotaCredito
     @idNotaCredito INT,
-    @idDetalleFactura INT,
-    @cantidad INT
+    @cantidad INT,
+    @subtotal DECIMAL(10,2)
 AS
 BEGIN
-    -- Verifico idNotaCredito
+--Validamos que la nota de credito exista
     IF NOT EXISTS (SELECT 1 FROM ventas.NotaCredito WHERE id = @idNotaCredito)
     BEGIN
-        PRINT 'Error: El id de la nota de crédito no existe.';
+        PRINT 'Error: La nota de credito no existe.';
         RETURN;
     END
 
-    -- Verifico idDetalleFactura
-    IF NOT EXISTS (SELECT 1 FROM ventas.DetalleFactura WHERE id = @idDetalleFactura)
-    BEGIN
-        PRINT 'Error: El id del detalle de factura no existe.';
-        RETURN;
-    END
-
-    -- Calculo subtotal
-    DECLARE @precioUnitario DECIMAL(10,2);
-    DECLARE @subtotal DECIMAL(10,2);
-
-    SELECT @precioUnitario = precioUnitario
-    FROM ventas.DetalleFactura
-    WHERE id = @idDetalleFactura;
-
-    SET @subtotal = @precioUnitario * @cantidad;
-
-    -- Inserto detalle de nota de crédito
-    INSERT INTO ventas.DetalleNotaCredito (idNotaCredito, idDetalleFactura, cantidad, subtotal)
-    VALUES (@idNotaCredito, @idDetalleFactura, @cantidad, @subtotal);
+    INSERT INTO ventas.DetalleNotaCredito (idNotaCredito, cantidad, subtotal)
+    VALUES (@idNotaCredito, @cantidad, @subtotal);
 END;
 GO
+
 
