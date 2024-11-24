@@ -78,8 +78,7 @@ CREATE OR ALTER PROCEDURE productos.ModificarProducto
     @idLineaProd INT,
     @idProveedor INT,
     @precioUnitario DECIMAL(10,2),
-    @cantidadPorUnidad VARCHAR(30),
-    @estado CHAR(1)
+    @cantidadPorUnidad VARCHAR(30)
 AS
 BEGIN
 --Validamos existencia de producto
@@ -107,7 +106,6 @@ BEGIN
         idProveedor = @idProveedor,
         precioUnitario = @precioUnitario,
         cantidadPorUnidad = @cantidadPorUnidad,
-        estado = @estado
     WHERE id = @id;
 END;
 GO
