@@ -105,7 +105,7 @@ BEGIN
         idLineaProd = @idLineaProd,
         idProveedor = @idProveedor,
         precioUnitario = @precioUnitario,
-        cantidadPorUnidad = @cantidadPorUnidad,
+        cantidadPorUnidad = @cantidadPorUnidad
     WHERE id = @id;
 END;
 GO
