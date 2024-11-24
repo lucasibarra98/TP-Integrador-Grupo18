@@ -234,7 +234,7 @@ CREATE TABLE ventas.Factura (
 	total DECIMAL(10,2) NOT NULL,
     IVA DECIMAL(3,2) NOT NULL,
 	totalConIVA DECIMAL(10,2),
-	idPago INT UNIQUE NOT NULL,
+	idPago INT UNIQUE,
 	estado VARCHAR(20) DEFAULT 'Pendiente' CHECK(estado = 'Pendiente' OR estado = 'Pagada' OR estado = 'Anulada')
     CONSTRAINT PK_Factura PRIMARY KEY (id),
 	CONSTRAINT FK_Factura_TipoFactura FOREIGN KEY (idTipoFactura) REFERENCES ventas.TipoFactura (id),
