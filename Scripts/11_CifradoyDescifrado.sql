@@ -2,7 +2,7 @@ USE Com2900G18
 GO
 
 --Insercion de los datos para prueba 
-
+/*
 INSERT INTO negocio.Sucursal(nombre, direccion, horario, telefono, ciudad)
 VALUES
 ('Sucursal Central', 'Av. Libertador 1234', 'Lunes a Viernes 9:00 - 18:00', '011123456', 'Buenos Aires'),
@@ -30,29 +30,38 @@ VALUES
 ('Ricardo', 'Vazquez', 40000009, 'Av. 25 de Mayo 80', 'ricardo.vazquez@email.com', 'ricardo.vazquez@empresa.com', 20200009, 1, 3, 'Jornada completa'),
 ('Elena', 'Jimenez', 40000010, 'Calle 6 Norte 408', 'elena.jimenez@email.com', 'elena.jimenez@empresa.com', 20200010, 3, 1, 'TM');
 GO
-
+*/
 -- Hacemos un SP para la encriptacion de los datos
+
+SELECT *
+FROM negocio.Empleado
+
+
+ALTER TABLE negocio.Empleado
+ALTER COLUMN dni VARBINARY(MAX);
 
 CREATE OR ALTER PROCEDURE EncriptarYConvertirDatos
     @PassPhrase NVARCHAR(100)  -- Frase de contraseña para la encriptación
 AS
 BEGIN
+    -- Encriptar y actualizar los datos
+    UPDATE negocio.Empleado
+    SET dni = EncryptByPassPhrase(@PassPhrase, CONVERT(NVARCHAR(50), dni));
 
     UPDATE negocio.Empleado
-    SET dni = EncryptByPassPhrase(@PassPhrase, CONVERT(VARBINARY(MAX), dni));
+    SET cuil = EncryptByPassPhrase(@PassPhrase, CONVERT(NVARCHAR(50), cuil));
 
-    UPDATE negocio.Empleado
-    SET cuil = EncryptByPassPhrase(@PassPhrase, CONVERT(VARBINARY(MAX), cuil));
-    
     PRINT 'Datos convertidos y encriptados correctamente.';
 END;
 
 EXEC EncriptarYConvertirDatos @PassPhrase = 'AuroraSAG18';
 
+-- Mostramos los datos encriptados
+
 SELECT *
 FROM negocio.Empleado
 
--- Mostramos los datos encriptados
+
 
 CREATE OR ALTER PROCEDURE DesencriptarDatos
     @PassPhrase NVARCHAR(100)  -- Frase de contraseña para la desencriptación
@@ -70,3 +79,28 @@ EXEC DesencriptarDatos @PassPhrase = 'AuroraSAG18';
 
 SELECT *
 FROM negocio.Empleado
+
+SELECT 
+    COLUMN_NAME, 
+    DATA_TYPE
+FROM 
+    INFORMATION_SCHEMA.COLUMNS
+WHERE 
+    TABLE_SCHEMA = 'negocio'
+    AND TABLE_NAME = 'Empleado';
+
+
+
+SELECT 
+    tc.constraint_name AS ConstraintName,
+    tc.constraint_type AS ConstraintType,
+    kcu.column_name AS ColumnName
+FROM 
+    information_schema.table_constraints tc
+JOIN 
+    information_schema.key_column_usage kcu
+    ON tc.constraint_name = kcu.constraint_name
+WHERE 
+    tc.table_schema = 'negocio'  -- Esquema de la tabla
+    AND tc.table_name = 'Empleado'  -- Nombre de la tabla
+    AND tc.constraint_type = 'UNIQUE';  -- Verificar las restricciones de unicidad

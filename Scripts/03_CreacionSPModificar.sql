@@ -418,7 +418,7 @@ CREATE OR ALTER PROCEDURE ventas.ModificarFactura
     @id INT,
     @idTipoFactura INT,
     @idVenta INT,
-    @CUIT VARCHAR(10),
+    @CUIT BIGINT,
     @fecha DATE,
     @hora TIME,
     @total DECIMAL(10,2),

@@ -440,7 +440,7 @@ GO
 CREATE OR ALTER PROCEDURE ventas.InsertarFactura
     @idTipoFactura INT,
     @idVenta INT,
-    @CUIT VARCHAR(10),
+    @CUIT BIGINT,
     @IVA DECIMAL(3,2),
     @idPago INT = NULL
 AS
