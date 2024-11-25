@@ -3,9 +3,9 @@ GO
 
 -- Creamos los logins para cada cargo
 
-CREATE LOGIN LoginCajero WITH PASSWORD = 'Cajero.suc';
-CREATE LOGIN LoginSupervisor WITH PASSWORD = 'Supervisor.suc';
-CREATE LOGIN LoginGerente WITH PASSWORD = 'Gerente.suc';
+CREATE LOGIN LoginCajero WITH PASSWORD = 'Cajero.suc', DEFAULT_DATABASE = Com2900G18;
+CREATE LOGIN LoginSupervisor WITH PASSWORD = 'Supervisor.suc', DEFAULT_DATABASE = Com2900G18;
+CREATE LOGIN LoginGerente WITH PASSWORD = 'Gerente.suc', DEFAULT_DATABASE = Com2900G18;
 GO
 
 -- Creamos usuarios y asignamos login correspondiente
