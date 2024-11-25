@@ -191,7 +191,7 @@ CREATE TABLE ventas.Cliente (
 	apellido VARCHAR(50) NOT NULL,
 	dni INT NOT NULL,
 	genero VARCHAR(20) NOT NULL CHECK (genero = 'Male' OR genero = 'Female'),
-	tipoCliente VARCHAR(20) NOT NULL,
+	tipoCliente VARCHAR(20) NOT NULL CHECK (tipoCliente = 'Member' OR tipoCliente = 'Normal'),
     CONSTRAINT PK_Cliente PRIMARY KEY (id)
 );
 GO
@@ -228,9 +228,7 @@ CREATE TABLE ventas.Factura (
     id INT IDENTITY(1,1),
 	idTipoFactura INT NOT NULL,
 	idVenta INT UNIQUE NOT NULL,
-	CUIT VARCHAR(10) NOT NULL ,
-	fecha DATE NOT NULL,
-    hora TIME NOT NULL,
+	CUIT VARCHAR(10) NOT NULL,
 	total DECIMAL(10,2) NOT NULL,
     IVA DECIMAL(3,2) NOT NULL,
 	totalConIVA DECIMAL(10,2),

@@ -3,7 +3,7 @@
   <Items>
     <LogicalFolder Name="Connections" Type="2" Sorted="true">
       <Items>
-        <ConnectionNode Name="DESKTOP-H972CGI\SQLEXPRESS:DESKTOP-H972CGI\Lucas Ibarra">
+        <ConnectionNode Name="DESKTOP-H972CGI\SQLEXPRESS:DESKTOP-RMUFN3C\ferna">
           <Created>2024-11-10T15:56:58.244075-03:00</Created>
           <Type>SQL</Type>
           <Server>DESKTOP-H972CGI\SQLEXPRESS</Server>
@@ -18,7 +18,7 @@
           <ConnectionProtocol>NotSpecified</ConnectionProtocol>
           <ApplicationName>Microsoft SQL Server Management Studio - Query</ApplicationName>
         </ConnectionNode>
-        <ConnectionNode Name="DESKTOP-RMUFN3C\AURORASA:DESKTOP-H972CGI\Lucas Ibarra">
+        <ConnectionNode Name="DESKTOP-RMUFN3C\AURORASA:DESKTOP-RMUFN3C\ferna">
           <Created>2024-11-11T13:07:15.8662069-03:00</Created>
           <Type>SQL</Type>
           <Server>DESKTOP-RMUFN3C\AURORASA</Server>
@@ -38,74 +38,74 @@
     <LogicalFolder Name="Queries" Type="0" Sorted="true">
       <Items>
         <FileNode Name="00_CreacionDB.sql">
-          <AssociatedConnectionMoniker />
-          <AssociatedConnSrvName />
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:DESKTOP-RMUFN3C\AURORASA:True</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>DESKTOP-RMUFN3C\AURORASA</AssociatedConnSrvName>
           <AssociatedConnUserName />
           <FullPath>00_CreacionDB.sql</FullPath>
         </FileNode>
         <FileNode Name="01_CreacionSPAPI.sql">
-          <AssociatedConnectionMoniker />
-          <AssociatedConnSrvName />
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:DESKTOP-RMUFN3C\AURORASA:True</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>DESKTOP-RMUFN3C\AURORASA</AssociatedConnSrvName>
           <AssociatedConnUserName />
           <FullPath>01_CreacionSPAPI.sql</FullPath>
         </FileNode>
         <FileNode Name="02_CreacionSPInsertar.sql">
-          <AssociatedConnectionMoniker />
-          <AssociatedConnSrvName />
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:DESKTOP-RMUFN3C\AURORASA:True</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>DESKTOP-RMUFN3C\AURORASA</AssociatedConnSrvName>
           <AssociatedConnUserName />
           <FullPath>02_CreacionSPInsertar.sql</FullPath>
         </FileNode>
         <FileNode Name="03_CreacionSPModificar.sql">
-          <AssociatedConnectionMoniker />
-          <AssociatedConnSrvName />
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:DESKTOP-RMUFN3C\AURORASA:True</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>DESKTOP-RMUFN3C\AURORASA</AssociatedConnSrvName>
           <AssociatedConnUserName />
           <FullPath>03_CreacionSPModificar.sql</FullPath>
         </FileNode>
         <FileNode Name="04_CreacionSPEliminar.sql">
-          <AssociatedConnectionMoniker />
-          <AssociatedConnSrvName />
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:DESKTOP-RMUFN3C\AURORASA:True</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>DESKTOP-RMUFN3C\AURORASA</AssociatedConnSrvName>
           <AssociatedConnUserName />
           <FullPath>04_CreacionSPEliminar.sql</FullPath>
         </FileNode>
         <FileNode Name="05_CreacionPruebasInsercion.sql">
-          <AssociatedConnectionMoniker />
-          <AssociatedConnSrvName />
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:DESKTOP-RMUFN3C\AURORASA:True</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>DESKTOP-RMUFN3C\AURORASA</AssociatedConnSrvName>
           <AssociatedConnUserName />
           <FullPath>05_CreacionPruebasInsercion.sql</FullPath>
         </FileNode>
         <FileNode Name="06_CreacionPruebasModificacion.sql">
-          <AssociatedConnectionMoniker />
-          <AssociatedConnSrvName />
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:DESKTOP-RMUFN3C\AURORASA:True</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>DESKTOP-RMUFN3C\AURORASA</AssociatedConnSrvName>
           <AssociatedConnUserName />
           <FullPath>06_CreacionPruebasModificacion.sql</FullPath>
         </FileNode>
         <FileNode Name="07_CreacionSPImportacion.sql">
-          <AssociatedConnectionMoniker />
-          <AssociatedConnSrvName />
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:DESKTOP-RMUFN3C\AURORASA:True</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>DESKTOP-RMUFN3C\AURORASA</AssociatedConnSrvName>
           <AssociatedConnUserName />
           <FullPath>07_CreacionSPImportacion.sql</FullPath>
         </FileNode>
         <FileNode Name="08_VaciarTablas.sql">
-          <AssociatedConnectionMoniker />
-          <AssociatedConnSrvName />
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:DESKTOP-RMUFN3C\AURORASA:True</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>DESKTOP-RMUFN3C\AURORASA</AssociatedConnSrvName>
           <AssociatedConnUserName />
           <FullPath>08_VaciarTablas.sql</FullPath>
         </FileNode>
         <FileNode Name="09_EjecucionImportacion.sql">
-          <AssociatedConnectionMoniker />
-          <AssociatedConnSrvName />
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:DESKTOP-RMUFN3C\AURORASA:True</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>DESKTOP-RMUFN3C\AURORASA</AssociatedConnSrvName>
           <AssociatedConnUserName />
           <FullPath>09_EjecucionImportacion.sql</FullPath>
         </FileNode>
         <FileNode Name="10_CreacionRoles.sql">
-          <AssociatedConnectionMoniker />
-          <AssociatedConnSrvName />
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:DESKTOP-RMUFN3C\AURORASA:True</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>DESKTOP-RMUFN3C\AURORASA</AssociatedConnSrvName>
           <AssociatedConnUserName />
           <FullPath>10_CreacionRoles.sql</FullPath>
         </FileNode>
         <FileNode Name="11_CifradoyDescifrado.sql">
-          <AssociatedConnectionMoniker />
-          <AssociatedConnSrvName />
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:DESKTOP-RMUFN3C\AURORASA:True</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>DESKTOP-RMUFN3C\AURORASA</AssociatedConnSrvName>
           <AssociatedConnUserName />
           <FullPath>11_CifradoyDescifrado.sql</FullPath>
         </FileNode>
@@ -114,6 +114,12 @@
           <AssociatedConnSrvName>DESKTOP-H972CGI\SQLEXPRESS</AssociatedConnSrvName>
           <AssociatedConnUserName />
           <FullPath>12_Backups.sql</FullPath>
+        </FileNode>
+        <FileNode Name="13_Reportes.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:DESKTOP-RMUFN3C\AURORASA:True</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>DESKTOP-RMUFN3C\AURORASA</AssociatedConnSrvName>
+          <AssociatedConnUserName />
+          <FullPath>13_Reportes.sql</FullPath>
         </FileNode>
       </Items>
     </LogicalFolder>

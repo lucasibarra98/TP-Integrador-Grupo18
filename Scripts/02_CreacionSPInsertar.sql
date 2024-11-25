@@ -302,10 +302,16 @@ CREATE OR ALTER PROCEDURE ventas.InsertarVenta
     @idCliente INT,
     @idEmpleado INT,
     @idSucursal INT,
-    @fecha DATE,
-    @hora TIME
+	@fecha DATE = NULL,
+	@hora TIME = NULL
 AS
 BEGIN
+	IF @fecha IS NULL
+		SET @fecha = CAST(GETDATE() AS DATE)
+
+	IF @hora IS NULL
+		SET @hora = CAST(GETDATE() AS TIME)
+
     BEGIN TRY
 --Verificamos que el cliente existe
         IF NOT EXISTS (SELECT 1 FROM ventas.Cliente WHERE id = @idCliente)
@@ -329,7 +335,7 @@ BEGIN
         END
 
         INSERT INTO ventas.Venta (idCliente, idEmpleado, idSucursal, fecha, hora, totalSinIVA)
-        VALUES (@idCliente, @idEmpleado, @idSucursal, @fecha, @hora, NULL);
+        VALUES (@idCliente, @idEmpleado, @idSucursal, @fecha, @hora, 0);
 
     END TRY
     BEGIN CATCH
@@ -435,8 +441,6 @@ CREATE OR ALTER PROCEDURE ventas.InsertarFactura
     @idTipoFactura INT,
     @idVenta INT,
     @CUIT VARCHAR(10),
-    @fecha DATE,
-    @hora TIME,
     @IVA DECIMAL(3,2),
     @idPago INT = NULL
 AS
@@ -459,12 +463,12 @@ BEGIN
         SET @totalConIVA = @totalSinIVA * (1 + @IVA);
 
         -- Insertar la factura
-        INSERT INTO ventas.Factura (idTipoFactura, idVenta, CUIT, fecha, hora, total, IVA, totalConIVA, idPago, estado)
-        VALUES (@idTipoFactura, @idVenta, @CUIT, @fecha, @hora, @totalSinIVA, @IVA, @totalConIVA, @idPago,
+        INSERT INTO ventas.Factura (idTipoFactura, idVenta, CUIT, total, IVA, totalConIVA, idPago, estado)
+        VALUES (@idTipoFactura, @idVenta, @CUIT, @totalSinIVA, @IVA, @totalConIVA, @idPago,
                 CASE WHEN @idPago IS NOT NULL THEN 'Pagada' ELSE 'Pendiente' END);
     END TRY
     BEGIN CATCH
-        PRINT 'Error al insertar la factura.';
+        PRINT 'Error al insertar la factura. ' + ERROR_MESSAGE();;
     END CATCH
 END;
 GO

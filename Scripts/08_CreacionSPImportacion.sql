@@ -228,7 +228,7 @@ BEGIN
 	EXEC importacion.CargarLineasDeProducto @ruta=@ruta
 	EXEC importacion.ImportarMediosDePago @ruta=@ruta
 	EXEC importacion.ImportarSucursal @ruta=@ruta
-	EXEC importacion.ImportarEmpleados @ruta=@ruta		
+	EXEC importacion.ImportarEmpleados @ruta=@ruta
 END
 GO
 

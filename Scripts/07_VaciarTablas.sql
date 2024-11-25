@@ -2,19 +2,19 @@
 
 USE Com2900G18;
 
-DELETE FROM ventas.DetalleNotaCredito;
+DELETE FROM ventas.Factura
 GO
-DELETE FROM ventas.DetalleFactura
+DELETE FROM ventas.Pago
+GO
+DELETE FROM ventas.DetalleVenta
+GO
+DELETE FROM ventas.Venta
+GO
+DELETE FROM ventas.DetalleNotaCredito;
 GO
 DELETE FROM ventas.NotaCredito
 GO
-DELETE FROM ventas.Factura
-GO
-DELETE FROM ventas.TipoCliente
-GO
 DELETE FROM ventas.TipoFactura
-GO
-DELETE FROM ventas.Pago
 GO
 DELETE FROM ventas.MedioPago
 GO
@@ -23,12 +23,6 @@ GO
 DELETE FROM negocio.Cargo
 GO
 DELETE FROM negocio.Sucursal
-GO
-DELETE FROM negocio.Domicilio
-GO
-DELETE FROM negocio.Ciudad
-GO
-DELETE FROM negocio.Provincia
 GO
 DELETE FROM productos.Producto
 GO
