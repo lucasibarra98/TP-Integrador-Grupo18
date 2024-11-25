@@ -3,12 +3,6 @@ GO
 
 -- Creamos los logins para cada cargo
 
-ALTER LOGIN LoginCajero ENABLE
-ALTER LOGIN LoginSupervisor ENABLE
-ALTER LOGIN LoginGerente ENABLE
-
-ALTER LOGIN LoginCajero WITH PASSWORD = 'Cajero.suc';
-
 CREATE LOGIN LoginCajero WITH PASSWORD = 'Cajero.suc';
 CREATE LOGIN LoginSupervisor WITH PASSWORD = 'Supervisor.suc';
 CREATE LOGIN LoginGerente WITH PASSWORD = 'Gerente.suc';
