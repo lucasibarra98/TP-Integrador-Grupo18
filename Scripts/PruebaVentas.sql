@@ -20,7 +20,7 @@ INSERT INTO ventas.Factura VALUES
 ((SELECT id FROM ventas.TipoFactura WHERE sigla = 'C'), 1, '30999444', '2024-11-23', '18:02:00', 100000, 0.21, 121000, 5, 'Pendiente')
 GO
 
-SELECT * FROM ventas.venta
+SELECT FORMAT(CAST(hora AS DATETIME), 'hh:mm') FROM ventas.venta
 SELECT * FROM ventas.Cliente
 SELECT * FROM negocio.Empleado
 SELECT * FROM ventas.Factura

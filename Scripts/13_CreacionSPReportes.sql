@@ -38,8 +38,8 @@ CREATE OR ALTER VIEW reportes.MostrarReporteVentas AS
 		p.nombre as Producto, 
 		p.precioUnitario as 'Precio Unitario', 
 		dv.cantidad as Cantidad, 
-		v.fecha as Fecha, 
-		v.hora as Hora, 
+		FORMAT(v.fecha, 'd/M/yyyy') as Fecha, 
+		FORMAT(CAST(v.hora AS DATETIME), 'hh:mm') as Hora, 
 		mp.nombre as 'Medio de Pago',
 		e.id as Empleado, 
 		s.nombre as Sucursal
@@ -105,7 +105,7 @@ CREATE OR ALTER PROCEDURE reportes.ReporteMensual @ruta VARCHAR(256), @mes INT, 
 BEGIN
 	DECLARE @xml XML = (
 		SELECT reportes.ObtenerNombreDia(DATEPART(dw, fecha)) AS Día, SUM(total) AS Total
-		FROM ventas.Factura
+		FROM ventas.Factura f INNER JOIN ventas.Venta v ON f.idVenta = f.id
 		WHERE MONTH(fecha) = @mes AND YEAR(fecha) = @año
 		GROUP BY DATEPART(dw, fecha)
 		FOR XML AUTO, ROOT('ReporteMensual')
@@ -118,9 +118,9 @@ GO
 CREATE OR ALTER PROCEDURE reportes.ReporteTrimestral @ruta VARCHAR(256) AS
 BEGIN
 	DECLARE @xml XML = (
-		SELECT reportes.ObtenerNombreMes(MONTH(F.fecha)) AS Mes, SUM(F.total) AS Total, E.turno AS Turno
+		SELECT reportes.ObtenerNombreMes(MONTH(v.fecha)) AS Mes, SUM(F.total) AS Total, E.turno AS Turno
 		FROM ventas.Factura AS F INNER JOIN ventas.Venta AS V ON F.idVenta = V.id INNER JOIN negocio.Empleado AS E ON V.idEmpleado = E.id
-		GROUP BY MONTH(F.fecha), E.Turno
+		GROUP BY MONTH(v.fecha), E.Turno
 		FOR XML AUTO, ROOT('ReporteTrimestral')
 	)
 
