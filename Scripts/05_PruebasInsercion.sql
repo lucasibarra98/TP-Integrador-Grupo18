@@ -284,7 +284,7 @@ EXEC ventas.InsertarPago
 SELECT id, estado FROM ventas.Factura WHERE idVenta IN (1, 2, 3);
 
 -- Insertar nota de crédito para la factura 1
-EXEC ventas.InsertarNotaCredito @idFactura = 5, @fecha = '2024-11-28', @total = 500.00, @motivo = 'Devolucion de productos dañados';
+EXEC ventas.InsertarNotaCredito @idFactura = 1, @fecha = '2024-11-28', @total = 500.00, @motivo = 'Devolucion de productos dañados';
 EXEC ventas.InsertarDetalleNotaCredito @idNotaCredito = 1, @idDetalleVenta = 1, @cantidad = 1, @subtotal = 250.00; 
 
 
