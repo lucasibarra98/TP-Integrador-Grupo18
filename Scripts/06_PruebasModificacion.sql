@@ -101,7 +101,7 @@ EXEC ventas.ModificarCliente
     @apellido = 'Pérez', 
     @dni = 30123456, 
     @genero = 'Male', 
-    @tipoCliente = 'VIP'; -- correcto
+    @tipoCliente = 'Member'; -- correcto
 
 EXEC ventas.ModificarCliente 
     @id = 99, 

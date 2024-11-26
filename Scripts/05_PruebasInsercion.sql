@@ -222,7 +222,7 @@ EXEC ventas.InsertarMedioPago @nombre = 'Tarjeta de debito';
 
 -- Insertar clientes
 EXEC ventas.InsertarCliente @nombre = 'Carlos', @apellido = 'Pérez', @dni = 30123456, @genero = 'Male', @tipoCliente = 'Normal';
-EXEC ventas.InsertarCliente @nombre = 'María', @apellido = 'Gómez', @dni = 29123456, @genero = 'Female', @tipoCliente = 'Premium';
+EXEC ventas.InsertarCliente @nombre = 'María', @apellido = 'Gómez', @dni = 29123456, @genero = 'Female', @tipoCliente = 'Member';
 
 -- Insertar ventas
 EXEC ventas.InsertarVenta @idCliente = 1, @idEmpleado = 257020, @idSucursal = 1, @fecha = '2024-11-25', @hora = '10:30'
@@ -250,16 +250,12 @@ EXEC ventas.InsertarFactura
     @idTipoFactura = 1, 
     @idVenta = 1, 
     @CUIT = '20345678901', 
-    @fecha = '2024-11-25', 
-    @hora = '10:30', 
     @IVA = 0.21 
 
 EXEC ventas.InsertarFactura 
     @idTipoFactura = 2, 
     @idVenta = 2, 
-    @CUIT = '27345678902', 
-    @fecha = '2024-11-26', 
-    @hora = '14:20', 
+    @CUIT = '27345678902',  
     @IVA = 0.21
 
 
@@ -267,8 +263,6 @@ EXEC ventas.InsertarFactura
     @idTipoFactura = 1, 
     @idVenta = 3, 
     @CUIT = '27345678903', 
-    @fecha = '2024-11-27', 
-    @hora = '16:45', 
     @IVA = 0.10
 
 -- Insertar pagos

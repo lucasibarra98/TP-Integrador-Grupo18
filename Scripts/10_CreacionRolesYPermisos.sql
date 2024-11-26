@@ -146,10 +146,10 @@ JOIN
 LEFT JOIN 
     sys.objects obj ON perm.major_id = obj.object_id
 WHERE 
-    dp.name = 'Supervisor';
+    dp.name = 'Cajero';
 
 
---Probamos uno de los permisos
+--Probamos uno de los permisos (para el cajero en este caso)
 
 EXECUTE AS LOGIN = 'LoginCajero'; 
 

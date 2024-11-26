@@ -36,46 +36,107 @@ GO
 SELECT *
 FROM negocio.Empleado
 
-
 ALTER TABLE negocio.Empleado
-ALTER COLUMN dni VARBINARY(MAX);
+ADD dniOriginal INT, domicilioOriginal VARCHAR(100), emailPersonalOriginal VARCHAR(100), cuilOriginal BIGINT;
 
-CREATE OR ALTER PROCEDURE EncriptarYConvertirDatos
-    @PassPhrase NVARCHAR(100)  -- Frase de contraseña para la encriptación
+UPDATE negocio.Empleado
+SET 
+    dniOriginal = CONVERT(INT, CONVERT(NVARCHAR, dni))
+	cuilOriginal = cuil
+	
+	,
+    domicilioOriginal = domicilio,
+    emailPersonalOriginal = emailPersonal,
+    cuilOriginal = cuil;
+
+SELECT *
+FROM negocio.Empleado
+
+/*
+CREATE OR ALTER PROCEDURE EncriptarDatosSensibles
+    @Frase VARCHAR(100) -- Parámetro de frase de paso
 AS
 BEGIN
-    -- Encriptar y actualizar los datos
+    -- Insertar directamente los datos encriptados en la tabla negocio.Empleado
     UPDATE negocio.Empleado
-    SET dni = EncryptByPassPhrase(@PassPhrase, CONVERT(NVARCHAR(50), dni));
+    SET
+        -- Encriptar y almacenar los datos en VARBINARY en la misma tabla original
+        dni = ENCRYPTBYPASSPHRASE(@Frase, CAST(dni AS VARCHAR(20))),    -- Encriptar dni (convertido a VARCHAR)
+        emailPersonal = ENCRYPTBYPASSPHRASE(@Frase, emailPersonal),       -- Encriptar emailPersonal
+        cuil = ENCRYPTBYPASSPHRASE(@Frase, CAST(cuil AS VARCHAR(20))),    -- Encriptar cuil (convertido a VARCHAR)
+        domicilio = ENCRYPTBYPASSPHRASE(@Frase, domicilio)                -- Encriptar domicilio
 
-    UPDATE negocio.Empleado
-    SET cuil = EncryptByPassPhrase(@PassPhrase, CONVERT(NVARCHAR(50), cuil));
-
-    PRINT 'Datos convertidos y encriptados correctamente.';
+    PRINT 'Datos encriptados y almacenados directamente en la tabla original.';
 END;
+GO
 
-EXEC EncriptarYConvertirDatos @PassPhrase = 'AuroraSAG18';
+EXEC EncriptarYTransferirDatos @Frase = 'AuroraSAG18';
 
+
+ALTER TABLE negocio.Empleado
+ALTER COLUMN cuil VARBINARY(MAX); -- Cambia a VARBINARY(MAX)
+
+SELECT
+    id,
+    --CAST(DECRYPTBYPASSPHRASE('AuroraSAG18', dni) AS VARCHAR(20)) AS dni,
+    CAST(DECRYPTBYPASSPHRASE('AuroraSAG18', emailPersonal) AS VARCHAR(100)) AS emailPersonal,
+    CAST(DECRYPTBYPASSPHRASE('AuroraSAG18', cuil) AS VARCHAR(20)) AS cuil,
+    CAST(DECRYPTBYPASSPHRASE('AuroraSAG18', domicilio) AS VARCHAR(100)) AS domicilio
+FROM negocio.Empleado;
 -- Mostramos los datos encriptados
 
 SELECT *
 FROM negocio.Empleado
 
+SELECT COLUMN_NAME, DATA_TYPE
+FROM INFORMATION_SCHEMA.COLUMNS
+WHERE TABLE_NAME = 'Empleado' AND COLUMN_NAME = 'cuil';
 
 
-CREATE OR ALTER PROCEDURE DesencriptarDatos
-    @PassPhrase NVARCHAR(100)  -- Frase de contraseña para la desencriptación
+CREATE OR ALTER PROCEDURE DesencriptarYTransferirDatos
+    @Frase NVARCHAR(100) -- Frase de paso para desencriptar los datos
 AS
 BEGIN
-    -- Desencriptar y convertir los valores a su tipo original
-    UPDATE negocio.Empleado
-    SET dni = CONVERT(INT, DecryptByPassPhrase(@PassPhrase, dni)),
-        cuil = CONVERT(BIGINT, DecryptByPassPhrase(@PassPhrase, cuil));
-    
-    PRINT 'Datos desencriptados correctamente.';
-END;
+    -- Crear una tabla temporal para almacenar los datos desencriptados
+    CREATE TABLE #EmpleadoTemp
+    (
+        id INT,
+        emailPersonal NVARCHAR(100),
+        cuil NVARCHAR(20),
+        domicilio NVARCHAR(100)
+    );
 
-EXEC DesencriptarDatos @PassPhrase = 'AuroraSAG18';
+    -- Insertar los datos desencriptados en la tabla temporal
+    INSERT INTO #EmpleadoTemp (id, emailPersonal, cuil, domicilio)
+    SELECT 
+        id,
+        CAST(DecryptByPassPhrase(@Frase, emailPersonal) AS NVARCHAR(100)), -- Desencriptar el emailPersonal
+        CAST(DecryptByPassPhrase(@Frase, cuil) AS NVARCHAR(20)), -- Desencriptar cuil
+        CAST(DecryptByPassPhrase(@Frase, domicilio) AS NVARCHAR(100)) -- Desencriptar domicilio
+    FROM negocio.Empleado;
+
+    -- Transferir los datos desencriptados de la tabla temporal a la tabla original
+    UPDATE e
+    SET 
+        e.emailPersonal = et.emailPersonal,
+        e.cuil = et.cuil,
+        e.domicilio = et.domicilio
+    FROM negocio.Empleado e
+    INNER JOIN #EmpleadoTemp et ON e.id = et.id;
+
+    -- Eliminar la tabla temporal después de la transferencia
+    DROP TABLE #EmpleadoTemp;
+
+    PRINT 'Datos desencriptados y transferidos a la tabla original.';
+END;
+GO
+
+EXEC DesencriptarDatos @Frase = 'AuroraSAG18';
+*/
+
+UPDATE negocio.Empleado
+SET
+domicilio = CAST(DecryptByPassPhrase('AuroraSAG18', domicilio) AS VARCHAR(100));
 
 SELECT *
 FROM negocio.Empleado
