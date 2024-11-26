@@ -29,50 +29,64 @@ VALUES
 ('Ricardo', 'Vazquez', 40000009, 'Av. 25 de Mayo 80', 'ricardo.vazquez@email.com', 'ricardo.vazquez@empresa.com', 20200009, 1, 3, 'Jornada completa'),
 ('Elena', 'Jimenez', 40000010, 'Calle 6 Norte 408', 'elena.jimenez@email.com', 'elena.jimenez@empresa.com', 20200010, 3, 1, 'TM');
 GO
--- Hacemos un SP para la encriptacion de los datos
 
---SANTI
-
--- Crear una clave maestra de la base de datos (si no existe)
+-- Crear clave maestra
 CREATE MASTER KEY ENCRYPTION BY PASSWORD = 'g18aurora';
 
--- Crear un certificado para la clave
+-- Crear un certificado
 CREATE CERTIFICATE CertificadoEmpleados
 WITH SUBJECT = 'Cifrado de datos personales en la tabla de empleados';
 
--- Crear una clave simétrica usando el certificado
+-- Crear clave simétrica usando el certificado
 CREATE SYMMETRIC KEY ClaveSimetricaEmpleados
 WITH ALGORITHM = AES_256
 ENCRYPTION BY CERTIFICATE CertificadoEmpleados;
+GO
 
--- Modificar la tabla de empleados para soportar cifrado
+-- Modificar la tabla Empleado para cambiar los tipos de datos a NVARCHAR(MAX)
 ALTER TABLE negocio.Empleado
-ADD
-    nombreCifrado VARBINARY(MAX),
-    apellidoCifrado VARBINARY(MAX),
-    domicilioCifrado VARBINARY(MAX),
-    emailPersonalCifrado VARBINARY(MAX),
-    emailEmpresaCifrado VARBINARY(MAX);
+ALTER COLUMN nombre NVARCHAR(MAX) NOT NULL;
+
+ALTER TABLE negocio.Empleado
+ALTER COLUMN apellido NVARCHAR(MAX) NOT NULL;
+
+ALTER TABLE negocio.Empleado
+ALTER COLUMN domicilio NVARCHAR(MAX) NOT NULL;
+
+ALTER TABLE negocio.Empleado
+ALTER COLUMN emailPersonal NVARCHAR(MAX) NOT NULL;
+
+ALTER TABLE negocio.Empleado
+ALTER COLUMN emailEmpresa NVARCHAR(MAX) NOT NULL;
+GO
+
 
 --Encriptado
 CREATE OR ALTER PROCEDURE negocio.EncriptarDatosEmpleado
 AS
 BEGIN
-    -- Abrir la clave simétrica
-    OPEN SYMMETRIC KEY ClaveSimetricaEmpleados
-    DECRYPTION BY CERTIFICATE CertificadoEmpleados;
+    BEGIN TRY
+        -- Abrir la clave simétrica
+        OPEN SYMMETRIC KEY ClaveSimetricaEmpleados
+        DECRYPTION BY CERTIFICATE CertificadoEmpleados;
 
-    -- Encriptar los datos personales
-    UPDATE negocio.Empleado
-    SET 
-        nombreCifrado = EncryptByKey(Key_GUID('ClaveSimetricaEmpleados'), CAST(nombre AS NVARCHAR(MAX))),
-        apellidoCifrado = EncryptByKey(Key_GUID('ClaveSimetricaEmpleados'), CAST(apellido AS NVARCHAR(MAX))),
-        domicilioCifrado = EncryptByKey(Key_GUID('ClaveSimetricaEmpleados'), CAST(domicilio AS NVARCHAR(MAX))),
-        emailPersonalCifrado = EncryptByKey(Key_GUID('ClaveSimetricaEmpleados'), CAST(emailPersonal AS NVARCHAR(MAX))),
-        emailEmpresaCifrado = EncryptByKey(Key_GUID('ClaveSimetricaEmpleados'), CAST(emailEmpresa AS NVARCHAR(MAX)));
+        -- Encriptar los datos sensibles
+        UPDATE negocio.Empleado
+        SET 
+            nombre = EncryptByKey(Key_GUID('ClaveSimetricaEmpleados'), CONVERT(NVARCHAR(MAX), nombre)),
+            apellido = EncryptByKey(Key_GUID('ClaveSimetricaEmpleados'), CONVERT(NVARCHAR(MAX), apellido)),
+            domicilio = EncryptByKey(Key_GUID('ClaveSimetricaEmpleados'), CONVERT(NVARCHAR(MAX), domicilio)),
+            emailPersonal = EncryptByKey(Key_GUID('ClaveSimetricaEmpleados'), CONVERT(NVARCHAR(MAX), emailPersonal)),
+            emailEmpresa = EncryptByKey(Key_GUID('ClaveSimetricaEmpleados'), CONVERT(NVARCHAR(MAX), emailEmpresa));
 
-    -- Cerrar la clave simétrica
-    CLOSE SYMMETRIC KEY ClaveSimetricaEmpleados;
+        -- Cerrar la clave simétrica
+        CLOSE SYMMETRIC KEY ClaveSimetricaEmpleados;
+
+        PRINT 'Cifrado completado exitosamente.';
+    END TRY
+    BEGIN CATCH
+        PRINT 'Error al cifrar los datos de los empleados.';
+    END CATCH
 END;
 GO
 
@@ -80,42 +94,49 @@ GO
 CREATE OR ALTER PROCEDURE negocio.DesencriptarDatosEmpleado
 AS
 BEGIN
-    -- Abrir la clave simétrica
-    OPEN SYMMETRIC KEY ClaveSimetricaEmpleados
-    DECRYPTION BY CERTIFICATE CertificadoEmpleados;
+    BEGIN TRY
+        -- Abrir la clave simétrica
+        OPEN SYMMETRIC KEY ClaveSimetricaEmpleados
+        DECRYPTION BY CERTIFICATE CertificadoEmpleados;
 
-    -- Recuperar y mostrar los datos desencriptados
-    SELECT 
-        id,
-        CAST(DecryptByKey(nombreCifrado) AS NVARCHAR(MAX)) AS nombre,
-        CAST(DecryptByKey(apellidoCifrado) AS NVARCHAR(MAX)) AS apellido,
-        CAST(DecryptByKey(domicilioCifrado) AS NVARCHAR(MAX)) AS domicilio,
-        CAST(DecryptByKey(emailPersonalCifrado) AS NVARCHAR(MAX)) AS emailPersonal,
-        CAST(DecryptByKey(emailEmpresaCifrado) AS NVARCHAR(MAX)) AS emailEmpresa
-    FROM negocio.Empleado;
+        -- Actualizar los campos directamente con los valores desencriptados
+        UPDATE negocio.Empleado
+        SET 
+            nombre = CONVERT(NVARCHAR(MAX), DecryptByKey(nombre)),
+            apellido = CONVERT(NVARCHAR(MAX), DecryptByKey(apellido)),
+            domicilio = CONVERT(NVARCHAR(MAX), DecryptByKey(domicilio)),
+            emailPersonal = CONVERT(NVARCHAR(MAX), DecryptByKey(emailPersonal)),
+            emailEmpresa = CONVERT(NVARCHAR(MAX), DecryptByKey(emailEmpresa));
 
-    -- Cerrar la clave simétrica
-    CLOSE SYMMETRIC KEY ClaveSimetricaEmpleados;
+        -- Cerrar la clave simétrica
+        CLOSE SYMMETRIC KEY ClaveSimetricaEmpleados;
+
+        PRINT 'Descifrado completado exitosamente.';
+    END TRY
+    BEGIN CATCH
+        -- En caso de error, se captura y se muestra un mensaje
+        PRINT 'Error al descifrar los datos de los empleados.';
+    END CATCH
 END;
 GO
 
+
+--Pruebas
+SELECT *
+FROM negocio.Empleado
 
 
 EXEC negocio.EncriptarDatosEmpleado;
 
 -- Valido encriptado
-SELECT id, nombreCifrado, apellidoCifrado, domicilioCifrado, emailPersonalCifrado, emailEmpresaCifrado
+SELECT id, nombre, apellido, domicilio, emailPersonal, emailEmpresa
 FROM negocio.Empleado;
 
 EXEC negocio.DesencriptarDatosEmpleado;
 
 
 
-
-
-
 /*
-
 
 SELECT *
 FROM negocio.Empleado
