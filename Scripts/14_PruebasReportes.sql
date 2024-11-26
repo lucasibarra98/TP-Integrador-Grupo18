@@ -54,8 +54,8 @@ GO
 
 -- Ejecución de las pruebas
 
-EXEC ventas.VentasMasivas
-GO
+--EXEC ventas.VentasMasivas
+--GO
 
 DECLARE @rutaReporteVentas VARCHAR(256) = 'C:\TP\TP_integrador_Archivos\Reportes\ReporteVentas.xml'
 DECLARE @rutaReporteMensual VARCHAR(256) = 'C:\TP\TP_integrador_Archivos\Reportes\ReporteMensual.xml'

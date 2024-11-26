@@ -299,9 +299,9 @@ GO
 --Cliente
 
 CREATE OR ALTER PROCEDURE ventas.InsertarCliente
-    @nombre VARCHAR(50),
-    @apellido VARCHAR(50),
-    @dni INT,
+    @nombre VARCHAR(50) = NULL,
+    @apellido VARCHAR(50) = NULL,
+    @dni INT = NULL,
     @genero VARCHAR(20),
     @tipoCliente VARCHAR(20)
 AS

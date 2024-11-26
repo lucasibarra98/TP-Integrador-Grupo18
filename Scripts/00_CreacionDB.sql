@@ -194,12 +194,12 @@ GO
 
 CREATE TABLE ventas.Cliente (
     id INT IDENTITY(1,1),
-    nombre VARCHAR(50) NOT NULL,
-	apellido VARCHAR(50) NOT NULL,
-	dni INT NOT NULL,
+    nombre VARCHAR(50),
+	apellido VARCHAR(50),
+	dni INT,
 	genero VARCHAR(20) NOT NULL CHECK (genero = 'Male' OR genero = 'Female'),
 	tipoCliente VARCHAR(20) NOT NULL CHECK (tipoCliente = 'Member' OR tipoCliente = 'Normal'),
-	cuil BIGINT NOT NULL DEFAULT 1234567890,
+	cuil BIGINT,
     CONSTRAINT PK_Cliente PRIMARY KEY (id)
 );
 GO

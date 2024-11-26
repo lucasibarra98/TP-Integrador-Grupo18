@@ -381,20 +381,26 @@ BEGIN
 		DECLARE @idEmpleado INT = CAST((SELECT empleado FROM #Venta WHERE numeroFila = @numeroFila) AS INT)
 		DECLARE @idSucursal INT = (SELECT id FROM #Venta v INNER JOIN negocio.Sucursal s ON s.ciudad = v.ciudad WHERE v.numeroFila = @numeroFila)
 		DECLARE @tipoFactura CHAR(1) = (SELECT tipoFactura FROM #Venta WHERE numeroFila = @numeroFila)
-		
-		EXEC ventas.generarVentaCompleta @idFactura = @idFactura, @idCliente = 2, @idEmpleado = @idEmpleado, @idSucursal = @idSucursal, @compras = @compras, @IVA = 0.21, @tipoFactura = @tipoFactura
+		DECLARE @fecha DATE = (SELECT CAST(fecha AS DATE) FROM #Venta WHERE numeroFila = @numeroFila)
+		DECLARE @hora TIME = (SELECT CAST(hora AS TIME) FROM #Venta WHERE numeroFila = @numeroFila)
+		DECLARE @genero VARCHAR(10) = (SELECT genero FROM #Venta WHERE numeroFila = @numeroFila)
+		DECLARE @tipoCliente VARCHAR(20) = (SELECT tipoCliente FROM #Venta WHERE numeroFila = @numeroFila)
+
+		EXEC ventas.InsertarCliente @genero = @genero, @tipoCliente = @tipoCliente
+		DECLARE @idCliente INT = IDENT_CURRENT('ventas.Cliente')
+
+		EXEC ventas.generarVentaCompleta @idFactura = @idFactura, @idCliente = 2, @idEmpleado = @idEmpleado, @idSucursal = @idSucursal, @compras = @compras, @IVA = 0.21, @tipoFactura = @tipoFactura, @fecha = @fecha, @hora = @hora
 
 		DECLARE @idFacturaInsertada INT = IDENT_CURRENT('ventas.Factura')
 		DECLARE @idMedioPago INT = (SELECT id FROM #Venta v INNER JOIN ventas.MedioPago m ON v.medioDePago = m.nombre WHERE numeroFila = @numeroFila)
-		DECLARE @cod CHAR(1) = (SELECT idPago FROM #Venta WHERE numeroFila = @numeroFila)
+		DECLARE @cod CHAR(50) = (SELECT idPago FROM #Venta WHERE numeroFila = @numeroFila)
 
-		IF @idFactura = '--'
+		IF @cod NOT LIKE '--%'
 			EXEC ventas.InsertarPago @idFactura = @idFacturaInsertada, @idMedioPago = 1, @cod = @cod
 		
 		DELETE @compras
 		SET @numeroFila = @numeroFila + 1
 	END
-	SELECT * FROM #Venta
 END
 GO
 
@@ -532,5 +538,5 @@ BEGIN
 	EXEC ventas.InsertarCliente @nombre = 'Ana', @apellido = 'Garcìa', @dni = 22345678, @genero = 'Female', @tipoCliente = 'Normal'
 	EXEC ventas.InsertarCliente @nombre = 'Diego', @apellido = 'Díaz', @dni = 72345678, @genero = 'Male', @tipoCliente = 'Normal'
 
-	EXEC negocio.InsertarConfiguracion @cuit = 30999999991, @cuitGenerico = 30222222221, @cuilGenerico = 12345678901
+	EXEC negocio.InsertarConfiguracion @cuit = NULL, @cuitGenerico = 20222222223, @cuilGenerico = 00000000000
 END
