@@ -88,11 +88,10 @@ END;
 GO
 
 --Pruebas
-/*
+
 EXEC negocio.EncriptarDatosEmpleado;
 
 SELECT * FROM negocio.Empleado;
-*/
 
 -- Valido encriptado
 /*

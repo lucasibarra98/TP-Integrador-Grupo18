@@ -68,10 +68,10 @@ DECLARE @rutaReporteTotalAcumuladoVentas VARCHAR(256) = 'C:\TP\TP_integrador_Arc
 EXEC reportes.ReporteVentas @ruta = @rutaReporteVentas
 EXEC reportes.ReporteMensual @ruta = @rutaReporteMensual, @mes = 11, @año = 2024
 EXEC reportes.ReporteTrimestral @ruta = @rutaReporteTrimestral
-EXEC reportes.ReportePorFechas  @ruta = @rutaReportePorFechas, @inicio = '2023-02-25', @fin = '2024-12-01'
+EXEC reportes.ReportePorFechas  @ruta = @rutaReportePorFechas, @inicio = '2018-01-01', @fin = '2024-12-31'
 EXEC reportes.reporteMasVendidos @ruta = @rutareporteMasVendidos, @mes = 11
 EXEC reportes.ReporteMenosVendidos @ruta = @rutaReporteMenosVendidos, @mes = 11
-EXEC reportes.ReporteTotalAcumuladoVentas @ruta = @rutaReporteTotalAcumuladoVentas, @fecha = '2024-11-22', @sucursal = 'San Justo'
+EXEC reportes.ReporteTotalAcumuladoVentas @ruta = @rutaReporteTotalAcumuladoVentas, @fecha = '2019-1-7', @sucursal = 'San Justo'
 GO
 
 SELECT * FROM reportes.MostrarReporteVentas
