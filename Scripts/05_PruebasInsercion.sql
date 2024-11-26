@@ -245,34 +245,37 @@ EXEC ventas.ActualizarTotalVenta @idVenta = 3;
 EXEC ventas.InsertarTipoFactura @sigla = 'A';
 EXEC ventas.InsertarTipoFactura @sigla = 'B';
 
+--Insertar configuracion
+EXEC negocio.InsertarConfiguracion @cuit = NULL, @cuitGenerico = 20222222223, @cuilGenerico = 00000000000;
+
 -- Insertar facturas
 EXEC ventas.InsertarFactura 
-    @idTipoFactura = 1, 
-    @idVenta = 1, 
-    @CUIT = '20345678901', 
+    @idTipoFactura = 1,
+	@idFactura = '123-45-678',
+    @idVenta = 1,  
     @IVA = 0.21 
 
 EXEC ventas.InsertarFactura 
     @idTipoFactura = 2, 
-    @idVenta = 2, 
-    @CUIT = '27345678902',  
+	@idFactura = '321-54-987',
+    @idVenta = 2,   
     @IVA = 0.21
 
 
 EXEC ventas.InsertarFactura 
-    @idTipoFactura = 1, 
+    @idTipoFactura = 1,
+	@idFactura = '122-99-678',
     @idVenta = 3, 
-    @CUIT = '27345678903', 
     @IVA = 0.10
 
 -- Insertar pagos
 EXEC ventas.InsertarPago
-    @idFactura = 1,
+    @idFactura = 5,
     @idMedioPago = 2,
     @cod = 'PA001'; 
 
 EXEC ventas.InsertarPago
-    @idFactura = 2,
+    @idFactura = 6,
     @idMedioPago = 2,
     @cod = 'PA002'; 
 
@@ -281,8 +284,8 @@ EXEC ventas.InsertarPago
 SELECT id, estado FROM ventas.Factura WHERE idVenta IN (1, 2, 3);
 
 -- Insertar nota de crédito para la factura 1
-EXEC ventas.InsertarNotaCredito @idFactura = 1, @fecha = '2024-11-28', @total = 500.00, @motivo = 'Devolucion de productos dañados';
-EXEC ventas.InsertarDetalleNotaCredito @idNotaCredito = 1, @cantidad = 1, @subtotal = 250.00; 
+EXEC ventas.InsertarNotaCredito @idFactura = 5, @fecha = '2024-11-28', @total = 500.00, @motivo = 'Devolucion de productos dañados';
+EXEC ventas.InsertarDetalleNotaCredito @idNotaCredito = 1, @idDetalleVenta = 1, @cantidad = 1, @subtotal = 250.00; 
 
 
 
