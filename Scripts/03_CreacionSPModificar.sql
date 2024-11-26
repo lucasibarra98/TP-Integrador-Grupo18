@@ -505,6 +505,7 @@ GO
 CREATE OR ALTER PROCEDURE ventas.ModificarDetalleNotaCredito
     @id INT,
     @idNotaCredito INT,
+	@idDetalleVenta INT,
     @cantidad INT
 AS
 BEGIN
@@ -530,6 +531,7 @@ BEGIN
 
     UPDATE ventas.DetalleNotaCredito
     SET idNotaCredito = @idNotaCredito,
+		idDetalleVenta = @idDetalleVenta,
         cantidad = @cantidad,
         subtotal = @subtotal
     WHERE id = @id;

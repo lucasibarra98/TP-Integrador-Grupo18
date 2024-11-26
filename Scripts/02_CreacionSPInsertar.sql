@@ -528,10 +528,12 @@ BEGIN
 END;
 GO
 
+
 --Detalle Nota Credito
 
 CREATE OR ALTER PROCEDURE ventas.InsertarDetalleNotaCredito
     @idNotaCredito INT,
+	@idDetalleVenta INT,
     @cantidad INT,
     @subtotal DECIMAL(10,2)
 AS
@@ -543,8 +545,8 @@ BEGIN
         RETURN;
     END
 
-    INSERT INTO ventas.DetalleNotaCredito (idNotaCredito, cantidad, subtotal)
-    VALUES (@idNotaCredito, @cantidad, @subtotal);
+    INSERT INTO ventas.DetalleNotaCredito (idNotaCredito, idDetalleVenta, cantidad, subtotal)
+    VALUES (@idNotaCredito, @idDetalleVenta, @cantidad, @subtotal);
 END;
 GO
 

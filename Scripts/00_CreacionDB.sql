@@ -265,10 +265,12 @@ GO
 CREATE TABLE ventas.DetalleNotaCredito (
 	id INT IDENTITY(1,1),
 	idNotaCredito INT UNIQUE NOT NULL,
+	idDetalleVenta INT NOT NULL,
 	cantidad INT NOT NULL,
 	subtotal DECIMAL(10,2) NOT NULL,
 	CONSTRAINT PK_DetalleNotaCredito PRIMARY KEY (id),
-	CONSTRAINT FK_DetalleNotaCredito_idNotaCredito FOREIGN KEY (idNotaCredito) REFERENCES ventas.NotaCredito(id)
+	CONSTRAINT FK_DetalleNotaCredito_idNotaCredito FOREIGN KEY (idNotaCredito) REFERENCES ventas.NotaCredito(id),
+	CONSTRAINT FK_DetalleNotaCredito_idDetalleVenta FOREIGN KEY (idDetalleVenta) REFERENCES ventas.DetalleVenta(id)
 );
 GO
 
