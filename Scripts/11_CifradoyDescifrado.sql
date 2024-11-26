@@ -2,7 +2,6 @@ USE Com2900G18
 GO
 
 --Insercion de los datos para prueba 
-/*
 INSERT INTO negocio.Sucursal(nombre, direccion, horario, telefono, ciudad)
 VALUES
 ('Sucursal Central', 'Av. Libertador 1234', 'Lunes a Viernes 9:00 - 18:00', '011123456', 'Buenos Aires'),
@@ -30,8 +29,93 @@ VALUES
 ('Ricardo', 'Vazquez', 40000009, 'Av. 25 de Mayo 80', 'ricardo.vazquez@email.com', 'ricardo.vazquez@empresa.com', 20200009, 1, 3, 'Jornada completa'),
 ('Elena', 'Jimenez', 40000010, 'Calle 6 Norte 408', 'elena.jimenez@email.com', 'elena.jimenez@empresa.com', 20200010, 3, 1, 'TM');
 GO
-*/
 -- Hacemos un SP para la encriptacion de los datos
+
+--SANTI
+
+-- Crear una clave maestra de la base de datos (si no existe)
+CREATE MASTER KEY ENCRYPTION BY PASSWORD = 'g18aurora';
+
+-- Crear un certificado para la clave
+CREATE CERTIFICATE CertificadoEmpleados
+WITH SUBJECT = 'Cifrado de datos personales en la tabla de empleados';
+
+-- Crear una clave simétrica usando el certificado
+CREATE SYMMETRIC KEY ClaveSimetricaEmpleados
+WITH ALGORITHM = AES_256
+ENCRYPTION BY CERTIFICATE CertificadoEmpleados;
+
+-- Modificar la tabla de empleados para soportar cifrado
+ALTER TABLE negocio.Empleado
+ADD
+    nombreCifrado VARBINARY(MAX),
+    apellidoCifrado VARBINARY(MAX),
+    domicilioCifrado VARBINARY(MAX),
+    emailPersonalCifrado VARBINARY(MAX),
+    emailEmpresaCifrado VARBINARY(MAX);
+
+--Encriptado
+CREATE OR ALTER PROCEDURE negocio.EncriptarDatosEmpleado
+AS
+BEGIN
+    -- Abrir la clave simétrica
+    OPEN SYMMETRIC KEY ClaveSimetricaEmpleados
+    DECRYPTION BY CERTIFICATE CertificadoEmpleados;
+
+    -- Encriptar los datos personales
+    UPDATE negocio.Empleado
+    SET 
+        nombreCifrado = EncryptByKey(Key_GUID('ClaveSimetricaEmpleados'), CAST(nombre AS NVARCHAR(MAX))),
+        apellidoCifrado = EncryptByKey(Key_GUID('ClaveSimetricaEmpleados'), CAST(apellido AS NVARCHAR(MAX))),
+        domicilioCifrado = EncryptByKey(Key_GUID('ClaveSimetricaEmpleados'), CAST(domicilio AS NVARCHAR(MAX))),
+        emailPersonalCifrado = EncryptByKey(Key_GUID('ClaveSimetricaEmpleados'), CAST(emailPersonal AS NVARCHAR(MAX))),
+        emailEmpresaCifrado = EncryptByKey(Key_GUID('ClaveSimetricaEmpleados'), CAST(emailEmpresa AS NVARCHAR(MAX)));
+
+    -- Cerrar la clave simétrica
+    CLOSE SYMMETRIC KEY ClaveSimetricaEmpleados;
+END;
+GO
+
+--Desencriptado
+CREATE OR ALTER PROCEDURE negocio.DesencriptarDatosEmpleado
+AS
+BEGIN
+    -- Abrir la clave simétrica
+    OPEN SYMMETRIC KEY ClaveSimetricaEmpleados
+    DECRYPTION BY CERTIFICATE CertificadoEmpleados;
+
+    -- Recuperar y mostrar los datos desencriptados
+    SELECT 
+        id,
+        CAST(DecryptByKey(nombreCifrado) AS NVARCHAR(MAX)) AS nombre,
+        CAST(DecryptByKey(apellidoCifrado) AS NVARCHAR(MAX)) AS apellido,
+        CAST(DecryptByKey(domicilioCifrado) AS NVARCHAR(MAX)) AS domicilio,
+        CAST(DecryptByKey(emailPersonalCifrado) AS NVARCHAR(MAX)) AS emailPersonal,
+        CAST(DecryptByKey(emailEmpresaCifrado) AS NVARCHAR(MAX)) AS emailEmpresa
+    FROM negocio.Empleado;
+
+    -- Cerrar la clave simétrica
+    CLOSE SYMMETRIC KEY ClaveSimetricaEmpleados;
+END;
+GO
+
+
+
+EXEC negocio.EncriptarDatosEmpleado;
+
+-- Valido encriptado
+SELECT id, nombreCifrado, apellidoCifrado, domicilioCifrado, emailPersonalCifrado, emailEmpresaCifrado
+FROM negocio.Empleado;
+
+EXEC negocio.DesencriptarDatosEmpleado;
+
+
+
+
+
+
+/*
+
 
 SELECT *
 FROM negocio.Empleado
@@ -54,7 +138,7 @@ FROM negocio.Empleado
 
 /*
 CREATE OR ALTER PROCEDURE EncriptarDatosSensibles
-    @Frase VARCHAR(100) -- Par�metro de frase de paso
+    @Frase VARCHAR(100) -- Parámetro de frase de paso
 AS
 BEGIN
     -- Insertar directamente los datos encriptados en la tabla negocio.Empleado
@@ -124,7 +208,7 @@ BEGIN
     FROM negocio.Empleado e
     INNER JOIN #EmpleadoTemp et ON e.id = et.id;
 
-    -- Eliminar la tabla temporal despu�s de la transferencia
+    -- Eliminar la tabla temporal después de la transferencia
     DROP TABLE #EmpleadoTemp;
 
     PRINT 'Datos desencriptados y transferidos a la tabla original.';
