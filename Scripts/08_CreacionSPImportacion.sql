@@ -389,7 +389,7 @@ BEGIN
 		EXEC ventas.InsertarCliente @genero = @genero, @tipoCliente = @tipoCliente
 		DECLARE @idCliente INT = IDENT_CURRENT('ventas.Cliente')
 
-		EXEC ventas.generarVentaCompleta @idFactura = @idFactura, @idCliente = 2, @idEmpleado = @idEmpleado, @idSucursal = @idSucursal, @compras = @compras, @IVA = 0.21, @tipoFactura = @tipoFactura, @fecha = @fecha, @hora = @hora
+		EXEC ventas.generarVentaCompleta @idFactura = @idFactura, @idCliente = @idCliente, @idEmpleado = @idEmpleado, @idSucursal = @idSucursal, @compras = @compras, @IVA = 0.21, @tipoFactura = @tipoFactura, @fecha = @fecha, @hora = @hora
 
 		DECLARE @idFacturaInsertada INT = IDENT_CURRENT('ventas.Factura')
 		DECLARE @idMedioPago INT = (SELECT id FROM #Venta v INNER JOIN ventas.MedioPago m ON v.medioDePago = m.nombre WHERE numeroFila = @numeroFila)
