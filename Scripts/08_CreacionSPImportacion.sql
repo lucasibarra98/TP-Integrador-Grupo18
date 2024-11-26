@@ -293,6 +293,111 @@ BEGIN
 END
 GO
 
+-- CreaciÛn de Store Procedures para importar las ventas
+
+CREATE OR ALTER PROCEDURE importacion.ImportarVentas @ruta VARCHAR(256) AS
+BEGIN
+	DROP TABLE IF EXISTS #Venta;
+	CREATE TABLE #Venta (idFactura CHAR(11), tipoFactura CHAR(1), ciudad VARCHAR(50), tipoCliente VARCHAR(20), genero VARCHAR(20), producto VARCHAR(100), precioUnitario VARCHAR(10), cantidad VARCHAR(10), fecha VARCHAR(10), hora VARCHAR(10), medioDePago VARCHAR(50), empleado VARCHAR(10), idPago VARCHAR(50));
+
+	DECLARE @sql NVARCHAR(256) = N'
+		BULK INSERT ' + '#Venta' + '
+		FROM ''' + @ruta + '''
+		WITH
+		(
+			ROWTERMINATOR = ''\n'',
+			FIRSTROW = 2,
+			FORMAT = ''CSV'',
+			CODEPAGE = ''65001'',
+			FIELDTERMINATOR = '';''
+		)';
+	EXEC sp_executesql @sql;
+
+	ALTER TABLE #Venta
+	ADD numeroFila INT;
+
+	WITH cte AS (
+    SELECT 
+        ROW_NUMBER() OVER (ORDER BY idFactura) AS numeroFilaCTE,
+		*
+    FROM #Venta
+	)
+	UPDATE #Venta
+	SET numeroFila = c.numeroFilaCTE
+	FROM #Venta v
+	INNER JOIN cte c ON v.idFactura = c.idFactura;
+
+	UPDATE #Venta
+	SET producto = REPLACE(producto, '√É¬∫', '˙')
+	WHERE producto LIKE '%√É¬∫%';
+
+	UPDATE #Venta
+	SET producto = REPLACE(producto, '√©', 'È')
+	WHERE producto LIKE '%√©%';
+
+	UPDATE #Venta
+	SET producto = REPLACE(producto, '√±', 'Ò')
+	WHERE producto LIKE '%√±%';
+
+	UPDATE #Venta
+	SET producto = REPLACE(producto, '√°', '·')
+	WHERE producto LIKE '%√°%';
+
+	UPDATE #Venta
+	SET producto = REPLACE(producto, '√≥', 'Û')
+	WHERE producto LIKE '%√≥%';
+
+	UPDATE #Venta
+	SET producto = REPLACE(producto, '√≠', 'Ì')
+	WHERE producto LIKE '%√≠%';
+
+	UPDATE #Venta
+	SET producto = REPLACE(producto, '√∫', '˙')
+	WHERE producto LIKE '%√∫%';
+
+	UPDATE #Venta
+	SET producto = REPLACE(producto, '¬∫', '∫')
+	WHERE producto LIKE '%¬∫%';
+
+	UPDATE #Venta
+	SET producto = REPLACE(producto, '√Å', '¡')
+	WHERE producto LIKE '%√Å%';
+
+	UPDATE #Venta
+	SET producto = REPLACE(producto, '√ëÅ', '—')
+	WHERE producto LIKE '%√ëÅ%';
+
+	DECLARE @numeroFila INT = 1;
+	WHILE EXISTS (SELECT 1 FROM #Venta WHERE numeroFila = @numeroFila)
+	BEGIN
+		DECLARE @compras ventas.NuevaVentaType
+
+		-- Insertar detalles de compra
+		INSERT INTO @compras VALUES
+			((SELECT id FROM productos.Producto WHERE nombre = (SELECT producto FROM #Venta WHERE numeroFila = @numeroFila)), (SELECT cantidad FROM #Venta WHERE numeroFila = @numeroFila))
+			
+		-- Generar venta y factura
+		DECLARE @idFactura CHAR(11) = (SELECT idFactura FROM #Venta WHERE numeroFila = @numeroFila)
+		DECLARE @idEmpleado INT = CAST((SELECT empleado FROM #Venta WHERE numeroFila = @numeroFila) AS INT)
+		DECLARE @idSucursal INT = (SELECT id FROM #Venta v INNER JOIN negocio.Sucursal s ON s.ciudad = v.ciudad WHERE v.numeroFila = @numeroFila)
+		DECLARE @tipoFactura CHAR(1) = (SELECT tipoFactura FROM #Venta WHERE numeroFila = @numeroFila)
+		
+		EXEC ventas.generarVentaCompleta @idFactura = @idFactura, @idCliente = 2, @idEmpleado = @idEmpleado, @idSucursal = @idSucursal, @compras = @compras, @IVA = 0.21, @tipoFactura = @tipoFactura
+
+		DECLARE @idFacturaInsertada INT = IDENT_CURRENT('ventas.Factura')
+		DECLARE @idMedioPago INT = (SELECT id FROM #Venta v INNER JOIN ventas.MedioPago m ON v.medioDePago = m.nombre WHERE numeroFila = @numeroFila)
+		DECLARE @cod CHAR(1) = (SELECT idPago FROM #Venta WHERE numeroFila = @numeroFila)
+
+		IF @idFactura = '--'
+			EXEC ventas.InsertarPago @idFactura = @idFacturaInsertada, @idMedioPago = 1, @cod = @cod
+		
+		DELETE @compras
+		SET @numeroFila = @numeroFila + 1
+	END
+	SELECT * FROM #Venta
+END
+GO
+
 CREATE OR ALTER PROCEDURE importacion.ImportarAccesoriosElectronicos @ruta VARCHAR(256) AS
 BEGIN
 	DROP TABLE IF EXISTS #CatalogoAccesoriosElectronicos;

@@ -1,36 +1,6 @@
 USE Com2900G18
 GO
 
-IF TYPE_ID(N'ventas.NuevaVentaType') IS NULL
-CREATE TYPE ventas.NuevaVentaType AS TABLE(idProducto INT, cantidad INT)
-GO
-
-CREATE OR ALTER PROCEDURE ventas.generarVentaCompleta
-	@idFactura VARCHAR(30),
-	@idCliente INT,
-	@idEmpleado INT,
-	@idSucursal INT,
-	@IVA DECIMAL(3,2),
-	@compras NuevaVentaType READONLY,
-	@tipoFactura CHAR(1),
-	@fecha DATE = NULL,
-	@hora TIME = NULL
-AS
-BEGIN
-	EXEC ventas.InsertarVenta @idCliente, @idEmpleado, @idSucursal, @fecha, @hora
-
-	DECLARE @idVenta INT = IDENT_CURRENT('ventas.Venta')
-	--EXEC ventas.InsertarDetallesVenta @idVenta, @compras
-	INSERT INTO ventas.DetalleVenta 
-	SELECT @idVenta, p.id, c.cantidad, p.precioUnitario, c.cantidad * p.precioUnitario FROM @compras c INNER JOIN productos.Producto p ON c.idProducto = p.id
-	
-	EXEC ventas.ActualizarTotalVenta @idVenta
-
-	DECLARE @idTipoFactura INT = (SELECT id FROM ventas.TipoFactura WHERE sigla = @tipoFactura)
-
-	EXEC ventas.InsertarFactura @idFactura, @idTipoFactura, @idVenta, @IVA
-END
-GO
 
 CREATE OR ALTER PROCEDURE ventas.VentasMasivas AS
 BEGIN
@@ -67,7 +37,7 @@ BEGIN
 		DECLARE @hora TIME = (SELECT CAST(DATEADD(SECOND, FLOOR(RAND() * (DATEDIFF(SECOND, @horaInicio, @horaFin) + 1)), @horaInicio) AS TIME));
 		DECLARE @idCliente INT = (SELECT TOP 1 id FROM ventas.Cliente ORDER BY NEWID());
 		DECLARE @idEmpleado INT = (SELECT TOP 1 id FROM negocio.Empleado ORDER BY NEWID());
-		DECLARE @idFactura VARCHAR(30) = LEFT(NEWID(), 30);
+		DECLARE @idFactura CHAR(11) = LEFT(NEWID(), 11);
 
 		EXEC ventas.generarVentaCompleta @idFactura = @idFactura, @idCliente = @idCliente, @idEmpleado = @idEmpleado, @idSucursal = @idSucursal, @fecha = @fecha, @hora = @hora, @compras = @compras, @IVA = 0.21, @tipoFactura = @tipoFactura
 

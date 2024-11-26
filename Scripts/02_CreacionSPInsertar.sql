@@ -460,7 +460,7 @@ GO
 --Factura
 
 CREATE OR ALTER PROCEDURE ventas.InsertarFactura
-	@idFactura VARCHAR(30),
+	@idFactura CHAR(11),
     @idTipoFactura INT,
     @idVenta INT,
     @IVA DECIMAL(3,2),
@@ -548,3 +548,34 @@ BEGIN
 END;
 GO
 
+-- Creación de venta con factura
+
+IF TYPE_ID(N'ventas.NuevaVentaType') IS NULL
+CREATE TYPE ventas.NuevaVentaType AS TABLE(idProducto INT, cantidad INT)
+GO
+
+CREATE OR ALTER PROCEDURE ventas.generarVentaCompleta
+	@idFactura CHAR(11),
+	@idCliente INT,
+	@idEmpleado INT,
+	@idSucursal INT,
+	@IVA DECIMAL(3,2),
+	@compras NuevaVentaType READONLY,
+	@tipoFactura CHAR(1),
+	@fecha DATE = NULL,
+	@hora TIME = NULL
+AS
+BEGIN
+	EXEC ventas.InsertarVenta @idCliente, @idEmpleado, @idSucursal, @fecha, @hora
+
+	DECLARE @idVenta INT = IDENT_CURRENT('ventas.Venta')
+	INSERT INTO ventas.DetalleVenta 
+	SELECT @idVenta, p.id, c.cantidad, p.precioUnitario, c.cantidad * p.precioUnitario FROM @compras c INNER JOIN productos.Producto p ON c.idProducto = p.id
+	
+	EXEC ventas.ActualizarTotalVenta @idVenta
+
+	DECLARE @idTipoFactura INT = (SELECT id FROM ventas.TipoFactura WHERE sigla = @tipoFactura)
+
+	EXEC ventas.InsertarFactura @idFactura, @idTipoFactura, @idVenta, @IVA
+END
+GO

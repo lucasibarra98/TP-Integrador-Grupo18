@@ -416,6 +416,7 @@ GO
 
 CREATE OR ALTER PROCEDURE ventas.ModificarFactura
     @id INT,
+	@idFactura CHAR(11),
     @idTipoFactura INT,
     @idVenta INT,
     @CUIT BIGINT,

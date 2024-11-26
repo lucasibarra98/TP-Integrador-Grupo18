@@ -71,6 +71,10 @@ DELETE FROM ventas.Cliente;
 DBCC CHECKIDENT ('ventas.Cliente', RESEED, 0);
 GO
 
+DELETE FROM negocio.Configuracion;
+DBCC CHECKIDENT ('negocio.Configuracion', RESEED, 0);
+GO
+
 -- Reactivar las restricciones de claves foráneas
 EXEC sp_MSforeachtable @command1="ALTER TABLE ? WITH CHECK CHECK CONSTRAINT all";
 GO
