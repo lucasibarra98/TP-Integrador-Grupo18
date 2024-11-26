@@ -60,6 +60,7 @@ END;
 GO
 
 EXEC CrearLoginYUsuarios;
+GO
 
 CREATE OR ALTER PROCEDURE CrearRoles
 AS
@@ -196,6 +197,8 @@ WHERE
 
 --Probamos uno de los permisos (para el cajero en este caso)
 
+/*
 EXECUTE AS LOGIN = 'LoginCajero'; 
 
 DELETE FROM productos.Producto WHERE id = 1;
+*/

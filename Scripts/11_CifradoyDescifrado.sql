@@ -2,6 +2,8 @@ USE Com2900G18
 GO
 
 --Insercion de los datos para prueba 
+
+/*
 INSERT INTO negocio.Sucursal(nombre, direccion, horario, telefono, ciudad)
 VALUES
 ('Sucursal Central', 'Av. Libertador 1234', 'Lunes a Viernes 9:00 - 18:00', '011123456', 'Buenos Aires'),
@@ -29,6 +31,7 @@ VALUES
 ('Ricardo', 'Vazquez', 40000009, 'Av. 25 de Mayo 80', 'ricardo.vazquez@email.com', 'ricardo.vazquez@empresa.com', 20200009, 1, 3, 'Jornada completa'),
 ('Elena', 'Jimenez', 40000010, 'Calle 6 Norte 408', 'elena.jimenez@email.com', 'elena.jimenez@empresa.com', 20200010, 3, 1, 'TM');
 GO
+*/
 
 -- Crear clave maestra
 CREATE MASTER KEY ENCRYPTION BY PASSWORD = 'g18aurora';
@@ -44,11 +47,9 @@ ENCRYPTION BY CERTIFICATE CertificadoEmpleados;
 GO
 
 -- Modificar la tabla Empleado para cambiar los tipos de datos a NVARCHAR(MAX)
-ALTER TABLE negocio.Empleado
-ALTER COLUMN nombre NVARCHAR(MAX) NOT NULL;
 
 ALTER TABLE negocio.Empleado
-ALTER COLUMN apellido NVARCHAR(MAX) NOT NULL;
+ALTER COLUMN dni NVARCHAR(MAX) NOT NULL;
 
 ALTER TABLE negocio.Empleado
 ALTER COLUMN domicilio NVARCHAR(MAX) NOT NULL;
@@ -57,7 +58,7 @@ ALTER TABLE negocio.Empleado
 ALTER COLUMN emailPersonal NVARCHAR(MAX) NOT NULL;
 
 ALTER TABLE negocio.Empleado
-ALTER COLUMN emailEmpresa NVARCHAR(MAX) NOT NULL;
+ALTER COLUMN cuil NVARCHAR(MAX) NOT NULL;
 GO
 
 
@@ -73,11 +74,10 @@ BEGIN
         -- Encriptar los datos sensibles
         UPDATE negocio.Empleado
         SET 
-            nombre = EncryptByKey(Key_GUID('ClaveSimetricaEmpleados'), CONVERT(NVARCHAR(MAX), nombre)),
-            apellido = EncryptByKey(Key_GUID('ClaveSimetricaEmpleados'), CONVERT(NVARCHAR(MAX), apellido)),
+			dni = EncryptByKey(Key_GUID('ClaveSimetricaEmpleados'), CONVERT(NVARCHAR(MAX), dni)),
             domicilio = EncryptByKey(Key_GUID('ClaveSimetricaEmpleados'), CONVERT(NVARCHAR(MAX), domicilio)),
             emailPersonal = EncryptByKey(Key_GUID('ClaveSimetricaEmpleados'), CONVERT(NVARCHAR(MAX), emailPersonal)),
-            emailEmpresa = EncryptByKey(Key_GUID('ClaveSimetricaEmpleados'), CONVERT(NVARCHAR(MAX), emailEmpresa));
+			cuil = EncryptByKey(Key_GUID('ClaveSimetricaEmpleados'), CONVERT(NVARCHAR(MAX), cuil))
 
         -- Cerrar la clave simétrica
         CLOSE SYMMETRIC KEY ClaveSimetricaEmpleados;
@@ -102,11 +102,10 @@ BEGIN
         -- Actualizar los campos directamente con los valores desencriptados
         UPDATE negocio.Empleado
         SET 
-            nombre = CONVERT(NVARCHAR(MAX), DecryptByKey(nombre)),
-            apellido = CONVERT(NVARCHAR(MAX), DecryptByKey(apellido)),
+			dni = CONVERT(NVARCHAR(MAX), DecryptByKey(dni)),
             domicilio = CONVERT(NVARCHAR(MAX), DecryptByKey(domicilio)),
             emailPersonal = CONVERT(NVARCHAR(MAX), DecryptByKey(emailPersonal)),
-            emailEmpresa = CONVERT(NVARCHAR(MAX), DecryptByKey(emailEmpresa));
+            cuil = CONVERT(NVARCHAR(MAX), DecryptByKey(cuil));
 
         -- Cerrar la clave simétrica
         CLOSE SYMMETRIC KEY ClaveSimetricaEmpleados;
@@ -120,153 +119,16 @@ BEGIN
 END;
 GO
 
-
 --Pruebas
-SELECT *
-FROM negocio.Empleado
-
-
+/*
 EXEC negocio.EncriptarDatosEmpleado;
 
--- Valido encriptado
-SELECT id, nombre, apellido, domicilio, emailPersonal, emailEmpresa
-FROM negocio.Empleado;
-
-EXEC negocio.DesencriptarDatosEmpleado;
-
-
-
-/*
-
-SELECT *
-FROM negocio.Empleado
-
-ALTER TABLE negocio.Empleado
-ADD dniOriginal INT, domicilioOriginal VARCHAR(100), emailPersonalOriginal VARCHAR(100), cuilOriginal BIGINT;
-
-UPDATE negocio.Empleado
-SET 
-    dniOriginal = CONVERT(INT, CONVERT(NVARCHAR, dni))
-	cuilOriginal = cuil
-	
-	,
-    domicilioOriginal = domicilio,
-    emailPersonalOriginal = emailPersonal,
-    cuilOriginal = cuil;
-
-SELECT *
-FROM negocio.Empleado
-
-/*
-CREATE OR ALTER PROCEDURE EncriptarDatosSensibles
-    @Frase VARCHAR(100) -- Parámetro de frase de paso
-AS
-BEGIN
-    -- Insertar directamente los datos encriptados en la tabla negocio.Empleado
-    UPDATE negocio.Empleado
-    SET
-        -- Encriptar y almacenar los datos en VARBINARY en la misma tabla original
-        dni = ENCRYPTBYPASSPHRASE(@Frase, CAST(dni AS VARCHAR(20))),    -- Encriptar dni (convertido a VARCHAR)
-        emailPersonal = ENCRYPTBYPASSPHRASE(@Frase, emailPersonal),       -- Encriptar emailPersonal
-        cuil = ENCRYPTBYPASSPHRASE(@Frase, CAST(cuil AS VARCHAR(20))),    -- Encriptar cuil (convertido a VARCHAR)
-        domicilio = ENCRYPTBYPASSPHRASE(@Frase, domicilio)                -- Encriptar domicilio
-
-    PRINT 'Datos encriptados y almacenados directamente en la tabla original.';
-END;
-GO
-
-EXEC EncriptarYTransferirDatos @Frase = 'AuroraSAG18';
-
-
-ALTER TABLE negocio.Empleado
-ALTER COLUMN cuil VARBINARY(MAX); -- Cambia a VARBINARY(MAX)
-
-SELECT
-    id,
-    --CAST(DECRYPTBYPASSPHRASE('AuroraSAG18', dni) AS VARCHAR(20)) AS dni,
-    CAST(DECRYPTBYPASSPHRASE('AuroraSAG18', emailPersonal) AS VARCHAR(100)) AS emailPersonal,
-    CAST(DECRYPTBYPASSPHRASE('AuroraSAG18', cuil) AS VARCHAR(20)) AS cuil,
-    CAST(DECRYPTBYPASSPHRASE('AuroraSAG18', domicilio) AS VARCHAR(100)) AS domicilio
-FROM negocio.Empleado;
--- Mostramos los datos encriptados
-
-SELECT *
-FROM negocio.Empleado
-
-SELECT COLUMN_NAME, DATA_TYPE
-FROM INFORMATION_SCHEMA.COLUMNS
-WHERE TABLE_NAME = 'Empleado' AND COLUMN_NAME = 'cuil';
-
-
-CREATE OR ALTER PROCEDURE DesencriptarYTransferirDatos
-    @Frase NVARCHAR(100) -- Frase de paso para desencriptar los datos
-AS
-BEGIN
-    -- Crear una tabla temporal para almacenar los datos desencriptados
-    CREATE TABLE #EmpleadoTemp
-    (
-        id INT,
-        emailPersonal NVARCHAR(100),
-        cuil NVARCHAR(20),
-        domicilio NVARCHAR(100)
-    );
-
-    -- Insertar los datos desencriptados en la tabla temporal
-    INSERT INTO #EmpleadoTemp (id, emailPersonal, cuil, domicilio)
-    SELECT 
-        id,
-        CAST(DecryptByPassPhrase(@Frase, emailPersonal) AS NVARCHAR(100)), -- Desencriptar el emailPersonal
-        CAST(DecryptByPassPhrase(@Frase, cuil) AS NVARCHAR(20)), -- Desencriptar cuil
-        CAST(DecryptByPassPhrase(@Frase, domicilio) AS NVARCHAR(100)) -- Desencriptar domicilio
-    FROM negocio.Empleado;
-
-    -- Transferir los datos desencriptados de la tabla temporal a la tabla original
-    UPDATE e
-    SET 
-        e.emailPersonal = et.emailPersonal,
-        e.cuil = et.cuil,
-        e.domicilio = et.domicilio
-    FROM negocio.Empleado e
-    INNER JOIN #EmpleadoTemp et ON e.id = et.id;
-
-    -- Eliminar la tabla temporal después de la transferencia
-    DROP TABLE #EmpleadoTemp;
-
-    PRINT 'Datos desencriptados y transferidos a la tabla original.';
-END;
-GO
-
-EXEC DesencriptarDatos @Frase = 'AuroraSAG18';
+SELECT id, dni, nombre, apellido, domicilio, emailPersonal, emailEmpresa FROM negocio.Empleado;
 */
 
-UPDATE negocio.Empleado
-SET
-domicilio = CAST(DecryptByPassPhrase('AuroraSAG18', domicilio) AS VARCHAR(100));
+-- Valido encriptado
+/*
+EXEC negocio.DesencriptarDatosEmpleado;
 
-SELECT *
-FROM negocio.Empleado
-
-SELECT 
-    COLUMN_NAME, 
-    DATA_TYPE
-FROM 
-    INFORMATION_SCHEMA.COLUMNS
-WHERE 
-    TABLE_SCHEMA = 'negocio'
-    AND TABLE_NAME = 'Empleado';
-
-
-
-SELECT 
-    tc.constraint_name AS ConstraintName,
-    tc.constraint_type AS ConstraintType,
-    kcu.column_name AS ColumnName
-FROM 
-    information_schema.table_constraints tc
-JOIN 
-    information_schema.key_column_usage kcu
-    ON tc.constraint_name = kcu.constraint_name
-WHERE 
-    tc.table_schema = 'negocio'  -- Esquema de la tabla
-    AND tc.table_name = 'Empleado'  -- Nombre de la tabla
-    AND tc.constraint_type = 'UNIQUE';  -- Verificar las restricciones de unicidad
+SELECT id, dni, nombre, apellido, domicilio, emailPersonal, emailEmpresa FROM negocio.Empleado;
+*/
