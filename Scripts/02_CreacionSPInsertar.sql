@@ -437,6 +437,7 @@ GO
 --Factura
 
 CREATE OR ALTER PROCEDURE ventas.InsertarFactura
+	@idFactura VARCHAR(30),
     @idTipoFactura INT,
     @idVenta INT,
     @CUIT BIGINT,
@@ -462,8 +463,8 @@ BEGIN
         SET @totalConIVA = @totalSinIVA * (1 + @IVA);
 
         -- Insertar la factura
-        INSERT INTO ventas.Factura (idTipoFactura, idVenta, CUIT, total, IVA, totalConIVA, idPago, estado)
-        VALUES (@idTipoFactura, @idVenta, @CUIT, @totalSinIVA, @IVA, @totalConIVA, @idPago,
+        INSERT INTO ventas.Factura (idFactura, idTipoFactura, idVenta, CUIT, total, IVA, totalConIVA, idPago, estado)
+        VALUES (@idFactura, @idTipoFactura, @idVenta, @CUIT, @totalSinIVA, @IVA, @totalConIVA, @idPago,
                 CASE WHEN @idPago IS NOT NULL THEN 'Pagada' ELSE 'Pendiente' END);
     END TRY
     BEGIN CATCH

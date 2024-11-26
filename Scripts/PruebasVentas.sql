@@ -41,11 +41,11 @@ INSERT INTO @compras VALUES
 	(100, 1155),
 	(500, 27)
 
-EXEC ventas.generarVentaCompleta @idCliente = 2, @idEmpleado = 257021, @idSucursal = 3, @compras = @compras, @IVA = 0.21, @CUIT = '123213', @tipoFactura = 'C'
+EXEC ventas.generarVentaCompleta @idFactura = 'CODIGO-FACTURA', @idCliente = 2, @idEmpleado = 257021, @idSucursal = 3, @compras = @compras, @IVA = 0.21, @CUIT = '123213', @tipoFactura = 'C'
 GO
 
 DECLARE @idFactura INT = IDENT_CURRENT('ventas.Factura')
-EXEC ventas.InsertarPago @idFactura = @idFactura, @idMedioPago = 1, @cod = 'CODIGO-PRUEBA-VENTA3'
+EXEC ventas.InsertarPago @idFactura = @idFactura, @idMedioPago = 1, @cod = 'CODIGO-PAGO'
 
 SELECT *
 FROM ventas.Venta

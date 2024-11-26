@@ -226,6 +226,7 @@ GO
 
 CREATE TABLE ventas.Factura (
     id INT IDENTITY(1,1),
+	idFactura VARCHAR(30) UNIQUE NOT NULL,
 	idTipoFactura INT NOT NULL,
 	idVenta INT UNIQUE NOT NULL,
 	CUIT BIGINT NOT NULL,

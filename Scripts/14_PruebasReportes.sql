@@ -6,6 +6,7 @@ CREATE TYPE ventas.NuevaVentaType AS TABLE(idProducto INT, cantidad INT)
 GO
 
 CREATE OR ALTER PROCEDURE ventas.generarVentaCompleta
+	@idFactura VARCHAR(30),
 	@idCliente INT,
 	@idEmpleado INT,
 	@idSucursal INT,
@@ -28,7 +29,7 @@ BEGIN
 
 	DECLARE @idTipoFactura INT = (SELECT id FROM ventas.TipoFactura WHERE sigla = @tipoFactura)
 
-	EXEC ventas.InsertarFactura @idTipoFactura, @idVenta, @CUIT, @IVA
+	EXEC ventas.InsertarFactura @idFactura, @idTipoFactura, @idVenta, @CUIT, @IVA
 END
 GO
 
@@ -67,12 +68,13 @@ BEGIN
 		DECLARE @hora TIME = (SELECT CAST(DATEADD(SECOND, FLOOR(RAND() * (DATEDIFF(SECOND, @horaInicio, @horaFin) + 1)), @horaInicio) AS TIME));
 		DECLARE @idCliente INT = (SELECT TOP 1 id FROM ventas.Cliente ORDER BY NEWID());
 		DECLARE @idEmpleado INT = (SELECT TOP 1 id FROM negocio.Empleado ORDER BY NEWID());
+		DECLARE @idFactura VARCHAR(30) = LEFT(NEWID(), 30);
 
-		EXEC ventas.generarVentaCompleta @idCliente = @idCliente, @idEmpleado = @idEmpleado, @idSucursal = @idSucursal, @fecha = @fecha, @hora = @hora, @compras = @compras, @IVA = 0.21, @CUIT = '123213', @tipoFactura = @tipoFactura
+		EXEC ventas.generarVentaCompleta @idFactura = @idFactura, @idCliente = @idCliente, @idEmpleado = @idEmpleado, @idSucursal = @idSucursal, @fecha = @fecha, @hora = @hora, @compras = @compras, @IVA = 0.21, @CUIT = '123213', @tipoFactura = @tipoFactura
 
-		DECLARE @idFactura INT = IDENT_CURRENT('ventas.Factura')
+		DECLARE @idFacturaVenta INT = IDENT_CURRENT('ventas.Factura')
 
-		EXEC ventas.InsertarPago @idFactura = @idFactura, @idMedioPago = @idMedioPago, @cod = @cod
+		EXEC ventas.InsertarPago @idFactura = @idFacturaVenta, @idMedioPago = @idMedioPago, @cod = @cod
 
 		DELETE FROM @compras
 

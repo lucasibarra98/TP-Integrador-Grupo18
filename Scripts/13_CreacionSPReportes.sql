@@ -29,7 +29,7 @@ END
 GO
 
 CREATE OR ALTER VIEW reportes.MostrarReporteVentas AS
-		SELECT f.id as 'ID Factura', 
+		SELECT f.idFactura as 'ID Factura', 
 		tf.sigla as 'Tipo de Factura', 
 		s.ciudad as 'Ciudad', 
 		c.tipoCliente as 'Tipo de Cliente', 
