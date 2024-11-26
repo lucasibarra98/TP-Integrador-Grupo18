@@ -172,6 +172,9 @@ BEGIN
         RETURN;
     END
 
+	IF @cuil IS NULL
+		SET @cuil = (SELECT cuilGenerico FROM negocio.Configuracion)
+
     IF NOT EXISTS (SELECT 1 FROM negocio.Empleado WHERE dni = @dni)
     BEGIN
         INSERT INTO negocio.Empleado (nombre, apellido, dni, domicilio, emailPersonal, emailEmpresa, cuil, idCargo, idSucursal, turno)
@@ -183,6 +186,26 @@ BEGIN
     END
 END;
 GO
+
+--Configuracion
+
+CREATE OR ALTER PROCEDURE negocio.InsertarConfiguracion
+    @cuit BIGINT,
+    @cuitGenerico BIGINT,
+    @cuilGenerico BIGINT
+AS
+BEGIN
+	IF EXISTS (SELECT 1 FROM negocio.Configuracion)
+	    BEGIN
+        PRINT 'Error: La configuración ya existe.';
+        RETURN;
+    END
+
+    INSERT INTO negocio.Configuracion (cuit, cuitGenerico, cuilGenerico)
+    VALUES (@cuit, @cuitGenerico, @cuilGenerico);
+END;
+GO
+
 
 ------SCHEMA VENTAS------
 
@@ -440,7 +463,6 @@ CREATE OR ALTER PROCEDURE ventas.InsertarFactura
 	@idFactura VARCHAR(30),
     @idTipoFactura INT,
     @idVenta INT,
-    @CUIT BIGINT,
     @IVA DECIMAL(3,2),
     @idPago INT = NULL
 AS
@@ -462,9 +484,21 @@ BEGIN
 --Calculamos el total con IVA
         SET @totalConIVA = @totalSinIVA * (1 + @IVA);
 
+--Obtenemos el CUIT de la empresa
+		DECLARE @CUIT BIGINT = (SELECT cuit FROM negocio.Configuracion)
+
+		IF @CUIT IS NULL
+			SET @CUIT = (SELECT cuitGenerico FROM negocio.Configuracion)
+
+--Obtenemos el CUIL del cliente
+		DECLARE @CUIL BIGINT = (SELECT cuil FROM ventas.Cliente c INNER JOIN ventas.Venta v ON c.id = v.idCliente AND v.id = @idVenta)
+
+		IF @CUIL IS NULL
+			SET @CUIL = (SELECT cuilGenerico FROM negocio.Configuracion)
+
         -- Insertar la factura
-        INSERT INTO ventas.Factura (idFactura, idTipoFactura, idVenta, CUIT, total, IVA, totalConIVA, idPago, estado)
-        VALUES (@idFactura, @idTipoFactura, @idVenta, @CUIT, @totalSinIVA, @IVA, @totalConIVA, @idPago,
+        INSERT INTO ventas.Factura (idFactura, idTipoFactura, idVenta, CUIT, CUIL, total, IVA, totalConIVA, idPago, estado)
+        VALUES (@idFactura, @idTipoFactura, @idVenta, @CUIT, @CUIL, @totalSinIVA, @IVA, @totalConIVA, @idPago,
                 CASE WHEN @idPago IS NOT NULL THEN 'Pagada' ELSE 'Pendiente' END);
     END TRY
     BEGIN CATCH
@@ -472,10 +506,6 @@ BEGIN
     END CATCH
 END;
 GO
-
-
-
-
 
 --Nota Credito
 
@@ -517,6 +547,4 @@ BEGIN
     VALUES (@idNotaCredito, @cantidad, @subtotal);
 END;
 GO
-
-
 

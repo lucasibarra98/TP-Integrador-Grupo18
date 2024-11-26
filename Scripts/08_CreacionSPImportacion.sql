@@ -157,7 +157,10 @@ BEGIN
 		direccion,
 		LOWER(REPLACE(emailPersonal, CHAR(9), '')),
 		LOWER(REPLACE(emailEmpresa, CHAR(9) , '')),
-		CAST(cuil AS BIGINT),
+		CASE
+			WHEN cuil IS NULL THEN (SELECT cuilGenerico FROM negocio.Configuracion)
+			ELSE CAST(cuil AS BIGINT)
+		END,
 		(SELECT id FROM negocio.Cargo WHERE nombre=cargo),
 		(SELECT id FROM negocio.Sucursal WHERE nombre = sucursal),
 		turno
@@ -412,3 +415,17 @@ BEGIN
 		WHERE NOT EXISTS (SELECT 1 FROM productos.Producto WHERE nombre = cpi.NombreProducto);
 END
 GO
+
+CREATE OR ALTER PROCEDURE importacion.InsertarDatosFaltantes AS
+BEGIN
+	-- Se insertan los tipos de factura que no vienen en la información complementaria
+	INSERT INTO ventas.TipoFactura VALUES
+	('A'), ('B'), ('C'), ('E'), ('M'), ('T')
+
+	-- Se insertan clientes que no vienen en la información complementaria
+	EXEC ventas.InsertarCliente @nombre = 'Juan', @apellido = 'López', @dni = 12345678, @genero = 'Male', @tipoCliente = 'Member'
+	EXEC ventas.InsertarCliente @nombre = 'Ana', @apellido = 'Garcìa', @dni = 22345678, @genero = 'Female', @tipoCliente = 'Normal'
+	EXEC ventas.InsertarCliente @nombre = 'Diego', @apellido = 'Díaz', @dni = 72345678, @genero = 'Male', @tipoCliente = 'Normal'
+
+	EXEC negocio.InsertarConfiguracion @cuit = 30999999991, @cuitGenerico = 30222222221, @cuilGenerico = 12345678901
+END

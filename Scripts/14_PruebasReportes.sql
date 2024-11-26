@@ -10,7 +10,6 @@ CREATE OR ALTER PROCEDURE ventas.generarVentaCompleta
 	@idCliente INT,
 	@idEmpleado INT,
 	@idSucursal INT,
-	@CUIT BIGINT,
 	@IVA DECIMAL(3,2),
 	@compras NuevaVentaType READONLY,
 	@tipoFactura CHAR(1),
@@ -29,7 +28,7 @@ BEGIN
 
 	DECLARE @idTipoFactura INT = (SELECT id FROM ventas.TipoFactura WHERE sigla = @tipoFactura)
 
-	EXEC ventas.InsertarFactura @idFactura, @idTipoFactura, @idVenta, @CUIT, @IVA
+	EXEC ventas.InsertarFactura @idFactura, @idTipoFactura, @idVenta, @IVA
 END
 GO
 
@@ -70,7 +69,7 @@ BEGIN
 		DECLARE @idEmpleado INT = (SELECT TOP 1 id FROM negocio.Empleado ORDER BY NEWID());
 		DECLARE @idFactura VARCHAR(30) = LEFT(NEWID(), 30);
 
-		EXEC ventas.generarVentaCompleta @idFactura = @idFactura, @idCliente = @idCliente, @idEmpleado = @idEmpleado, @idSucursal = @idSucursal, @fecha = @fecha, @hora = @hora, @compras = @compras, @IVA = 0.21, @CUIT = '123213', @tipoFactura = @tipoFactura
+		EXEC ventas.generarVentaCompleta @idFactura = @idFactura, @idCliente = @idCliente, @idEmpleado = @idEmpleado, @idSucursal = @idSucursal, @fecha = @fecha, @hora = @hora, @compras = @compras, @IVA = 0.21, @tipoFactura = @tipoFactura
 
 		DECLARE @idFacturaVenta INT = IDENT_CURRENT('ventas.Factura')
 
@@ -84,15 +83,6 @@ END
 GO
 
 -- Ejecución de las pruebas
-
--- Se insertan los tipos de factura que no vienen en la información complementaria
-INSERT INTO ventas.TipoFactura VALUES
-('A'), ('B'), ('C'), ('E'), ('M'), ('T')
-
--- Se insertan clientes que no vienen en la información complementaria
-EXEC ventas.InsertarCliente @nombre = 'Juan', @apellido = 'López', @dni = 12345678, @genero = 'Male', @tipoCliente = 'Member'
-EXEC ventas.InsertarCliente @nombre = 'Ana', @apellido = 'Garcìa', @dni = 22345678, @genero = 'Female', @tipoCliente = 'Normal'
-EXEC ventas.InsertarCliente @nombre = 'Diego', @apellido = 'Díaz', @dni = 72345678, @genero = 'Male', @tipoCliente = 'Normal'
 
 EXEC ventas.VentasMasivas
 GO

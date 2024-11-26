@@ -148,7 +148,7 @@ CREATE TABLE negocio.Empleado
     domicilio VARCHAR (100) NOT NULL,
     emailPersonal VARCHAR(100)NOT NULL,
     emailEmpresa VARCHAR(100) NOT NULL,
-    cuil BIGINT,
+    cuil BIGINT NOT NULL,
     idCargo INT NOT NULL,
     idSucursal INT NOT NULL,
     turno VARCHAR(20) NOT NULL CHECK (turno = 'TM' OR turno = 'TT' OR turno = 'Jornada completa'),
@@ -158,6 +158,13 @@ CREATE TABLE negocio.Empleado
 );
 GO
 
+CREATE TABLE negocio.Configuracion
+(
+	id INT IDENTITY(1,1),
+	cuit BIGINT,
+	cuitGenerico BIGINT NOT NULL,
+	cuilGenerico BIGINT NOT NULL
+)
 
 --SCHEMA ventas
 CREATE TABLE ventas.MedioPago (
@@ -192,6 +199,7 @@ CREATE TABLE ventas.Cliente (
 	dni INT NOT NULL,
 	genero VARCHAR(20) NOT NULL CHECK (genero = 'Male' OR genero = 'Female'),
 	tipoCliente VARCHAR(20) NOT NULL CHECK (tipoCliente = 'Member' OR tipoCliente = 'Normal'),
+	cuil BIGINT NOT NULL DEFAULT 1234567890,
     CONSTRAINT PK_Cliente PRIMARY KEY (id)
 );
 GO
@@ -230,6 +238,7 @@ CREATE TABLE ventas.Factura (
 	idTipoFactura INT NOT NULL,
 	idVenta INT UNIQUE NOT NULL,
 	CUIT BIGINT NOT NULL,
+	CUIL BIGINT NOT NULL,
 	total DECIMAL(10,2) NOT NULL,
     IVA DECIMAL(3,2) NOT NULL,
 	totalConIVA DECIMAL(10,2),

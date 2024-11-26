@@ -11,6 +11,7 @@ SET @rutaCatalogoCsv = 'C:\TP\TP_integrador_Archivos\Productos\catalogo.csv'
 SET @rutaCatalogoElectronica = 'C:\TP\TP_integrador_Archivos\Productos\Electronic accessories.xlsx'
 SET @rutaCatalogoImportados = 'C:\TP\TP_integrador_Archivos\Productos\Productos_importados.xlsx'
 
+EXEC importacion.InsertarDatosFaltantes
 EXEC importacion.ImportarInformacionComplementaria @ruta=@rutaInfoComplementaria
 EXEC importacion.ImportarCatalogoCsv @ruta=@rutaCatalogoCsv
 EXEC importacion.ImportarAccesoriosElectronicos @ruta=@rutaCatalogoElectronica

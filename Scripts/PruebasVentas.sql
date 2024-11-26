@@ -30,6 +30,7 @@ SELECT * FROM ventas.DetalleVenta
 SELECT * FROM productos.Producto
 SELECT * FROM negocio.Sucursal
 SELECT * FROM ventas.TipoFactura
+SELECT * FROM ventas.Venta
 */
 
 -- Crear tabla con los detalles de compra
@@ -44,7 +45,7 @@ INSERT INTO @compras VALUES
 	(500, 27)
 
 -- Generar venta y factura
-EXEC ventas.generarVentaCompleta @idFactura = 'CODIGO-FACTURA', @idCliente = 2, @idEmpleado = 257021, @idSucursal = 3, @compras = @compras, @IVA = 0.21, @CUIT = '123213', @tipoFactura = 'C'
+EXEC ventas.generarVentaCompleta @idFactura = 'CODIGO-FACTURA', @idCliente = 2, @idEmpleado = 257021, @idSucursal = 3, @compras = @compras, @IVA = 0.21, @tipoFactura = 'C'
 GO
 
 -- Pagar la factura creada
@@ -65,8 +66,3 @@ WHERE idVenta = IDENT_CURRENT('ventas.Venta')
 SELECT *
 FROM ventas.Factura
 WHERE id = IDENT_CURRENT('ventas.Factura')
-
--- Mostrar venta del reporte para la factura generada
-SELECT *
-FROM reportes.MostrarReporteVentas
-WHERE [ID Factura] = IDENT_CURRENT('ventas.Factura')
