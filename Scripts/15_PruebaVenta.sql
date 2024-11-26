@@ -3,7 +3,6 @@ GO
 
 
 /*
-SELECT FORMAT(CAST(hora AS DATETIME), 'hh:mm') FROM ventas.venta
 SELECT * FROM ventas.Cliente
 SELECT * FROM negocio.Empleado
 SELECT * FROM ventas.Factura
@@ -28,12 +27,12 @@ INSERT INTO @compras VALUES
 	(500, 27)
 
 -- Generar venta y factura
-EXEC ventas.generarVentaCompleta @idFactura = 'CODIGO-FACTURA', @idCliente = 2, @idEmpleado = 257021, @idSucursal = 3, @compras = @compras, @IVA = 0.21, @tipoFactura = 'C'
+EXEC ventas.generarVentaCompleta @idFactura = 'COD-FACT', @idCliente = 2, @idEmpleado = 257021, @idSucursal = 3, @compras = @compras, @IVA = 0.21, @tipoFactura = 'C'
 GO
 
 -- Pagar la factura creada
 DECLARE @idFactura INT = IDENT_CURRENT('ventas.Factura')
-EXEC ventas.InsertarPago @idFactura = @idFactura, @idMedioPago = 1, @cod = 'CODIGO-PAGO'
+EXEC ventas.InsertarPago @idFactura = @idFactura, @idMedioPago = 1, @cod = 'CODIGO-PAGO2'
 
 -- Mostrar venta generada
 SELECT *
