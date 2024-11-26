@@ -421,10 +421,9 @@ BEGIN
 --Calculamos subtotal
         SET @subtotal = @precioUnitario * @cotizacionDolar * @cantidad;
 
-        INSERT INTO ventas.DetalleVenta (idVenta, idProducto, cantidad, subtotal)
-        VALUES (@idVenta, @idProducto, @cantidad, @subtotal);
+        INSERT INTO ventas.DetalleVenta (idVenta, idProducto, cantidad, precioUnitario ,subtotal)
+        VALUES (@idVenta, @idProducto, @cantidad, @precioUnitario, @subtotal);
 
-        PRINT 'Detalle de venta insertado correctamente.';
     END TRY
     BEGIN CATCH
         PRINT 'Error al insertar el detalle de venta: ' + ERROR_MESSAGE();
