@@ -1,20 +1,65 @@
 USE Com2900G18
 GO
 
--- Creamos los logins para cada cargo
+-- Creamos los logins y usuarios para cada cargo y hacemos la asignacion correspondiente
 
-CREATE LOGIN LoginCajero WITH PASSWORD = 'Cajero.suc', DEFAULT_DATABASE = Com2900G18;
-CREATE LOGIN LoginSupervisor WITH PASSWORD = 'Supervisor.suc', DEFAULT_DATABASE = Com2900G18;
-CREATE LOGIN LoginGerente WITH PASSWORD = 'Gerente.suc', DEFAULT_DATABASE = Com2900G18;
+CREATE OR ALTER PROCEDURE CrearLoginYUsuarios
+AS
+BEGIN
+
+	IF NOT EXISTS (SELECT 1 FROM sys.server_principals WHERE name = 'LoginCajero')
+	BEGIN
+		CREATE LOGIN LoginCajero WITH PASSWORD = 'Cajero.suc', DEFAULT_DATABASE = Com2900G18;
+		PRINT 'LoginCajero creado correctamente.';
+	END
+	ELSE
+		PRINT 'LoginCajero ya existe.';
+
+	IF NOT EXISTS (SELECT 1 FROM sys.server_principals WHERE name = 'LoginSupervisor')
+	BEGIN
+		CREATE LOGIN LoginSupervisor WITH PASSWORD = 'Supervisor.suc', DEFAULT_DATABASE = Com2900G18;
+		PRINT 'LoginSupervisor creado correctamente.';
+	END
+	ELSE
+		PRINT 'LoginSupervisor ya existe.';
+
+	IF NOT EXISTS (SELECT 1 FROM sys.server_principals WHERE name = 'LoginGerente')
+	BEGIN
+		CREATE LOGIN LoginGerente WITH PASSWORD = 'Gerente.suc', DEFAULT_DATABASE = Com2900G18;
+		PRINT 'LoginGerente creado correctamente.';
+	END
+	ELSE
+		PRINT 'LoginGerente ya existe.';
+
+	IF NOT EXISTS (SELECT 1 FROM sys.database_principals WHERE name = 'Cajero_Sucursal')
+    BEGIN
+        CREATE USER Cajero_Sucursal FOR LOGIN LoginCajero;
+        PRINT 'Usuario Cajero_Sucursal creado correctamente.';
+    END
+    ELSE
+        PRINT 'Usuario Cajero_Sucursal ya existe.';
+
+    -- Crear Usuario para Supervisor si no existe
+    IF NOT EXISTS (SELECT 1 FROM sys.database_principals WHERE name = 'Supervisor_Sucursal')
+    BEGIN
+        CREATE USER Supervisor_Sucursal FOR LOGIN LoginSupervisor;
+        PRINT 'Usuario Supervisor_Sucursal creado correctamente.';
+    END
+    ELSE
+        PRINT 'Usuario Supervisor_Sucursal ya existe.';
+
+    -- Crear Usuario para Gerente si no existe
+    IF NOT EXISTS (SELECT 1 FROM sys.database_principals WHERE name = 'Gerente_Sucursal')
+    BEGIN
+        CREATE USER Gerente_Sucursal FOR LOGIN LoginGerente;
+        PRINT 'Usuario Gerente_Sucursal creado correctamente.';
+    END
+    ELSE
+        PRINT 'Usuario Gerente_Sucursal ya existe.';
+END;
 GO
 
--- Creamos usuarios y asignamos login correspondiente
-
-CREATE USER Cajero_Sucursal FOR LOGIN LoginCajero;
-CREATE USER Supervisor_Sucursal FOR LOGIN LoginSupervisor;
-CREATE USER Gerente_Sucursal FOR LOGIN LoginGerente;
-GO
-
+EXEC CrearLoginYUsuarios;
 
 CREATE OR ALTER PROCEDURE CrearRoles
 AS
