@@ -1,7 +1,7 @@
 USE Com2900G18
 GO
 
-
+/*
 CREATE OR ALTER PROCEDURE ventas.VentasMasivas AS
 BEGIN
 	DECLARE @i INT = 0
@@ -51,7 +51,7 @@ BEGIN
 	END
 END
 GO
-
+*/
 -- Ejecución de las pruebas
 
 --EXEC ventas.VentasMasivas
